@@ -10,7 +10,7 @@ repository = "https://github.com/forattini-dev/tuiuiu.rs"
 homepage = "https://github.com/forattini-dev/tuiuiu.rs"
 documentation = "https://docs.rs/tuiuiu"
 readme = "README.md"
-keywords = ["terminal", "tui", "cli", "ui", "signals", "flexbox", "reactive"]
+keywords = ["terminal", "tui", "reactive", "flexbox", "cli"]
 categories = ["command-line-interface", "gui"]
 
 [features]
