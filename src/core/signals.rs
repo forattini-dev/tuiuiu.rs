@@ -319,6 +319,7 @@ struct MemoInner<T> {
     id: u64,
     compute: Box<dyn Fn() -> T>,
     cached: RefCell<Option<T>>,
+    #[allow(dead_code)]
     dependencies: RefCell<HashSet<u64>>,
 }
 

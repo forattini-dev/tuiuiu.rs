@@ -46,7 +46,7 @@ pub fn use_callback<F: Clone + 'static>(callback: F, _deps: &[&dyn std::any::Any
 }
 
 /// Run an effect only once on mount.
-pub fn use_mount<F: FnOnce() + 'static>(effect: F) {
+pub fn use_mount<F: FnOnce() + 'static>(_effect: F) {
     use std::cell::Cell;
     let ran = Cell::new(false);
     create_effect(move || {

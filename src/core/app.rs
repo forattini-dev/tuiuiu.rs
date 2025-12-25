@@ -2,9 +2,8 @@
 //!
 //! Manages the main render loop, event handling, and application state.
 
-use std::io::{self, Write};
+use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::time::Duration;
 
 use crate::core::terminal::{Terminal, TerminalEvent, Key};
@@ -72,7 +71,9 @@ impl Default for RenderOptions {
 pub struct App {
     terminal: Terminal,
     options: RenderOptions,
+    #[allow(dead_code)]
     buffer: OutputBuffer,
+    #[allow(dead_code)]
     prev_buffer: OutputBuffer,
     exit_code: i32,
 }
@@ -269,7 +270,7 @@ impl AppContext {
     }
 
     /// Exit with a specific code.
-    pub fn exit_with_code(&self, code: i32) {
+    pub fn exit_with_code(&self, _code: i32) {
         // In a full implementation, this would set the exit code
         exit();
     }

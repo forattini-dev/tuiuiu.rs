@@ -113,6 +113,7 @@ pub struct FocusManager {
     /// Registered focusable elements
     elements: HashMap<u64, Focusable>,
     /// Focus zones
+    #[allow(dead_code)]
     zones: HashMap<u64, FocusZoneState>,
     /// Currently focused element ID
     focused: Option<u64>,

@@ -400,6 +400,7 @@ pub struct Gauge {
     label: Option<String>,
     show_percentage: bool,
     color: Color,
+    #[allow(dead_code)]
     background_color: Color,
     thresholds: Vec<(f64, Color)>,
 }
@@ -570,6 +571,7 @@ pub struct LineChart {
     labels: Vec<String>,
     width: u16,
     height: u16,
+    #[allow(dead_code)]
     colors: Vec<Color>,
     show_legend: bool,
 }
@@ -694,6 +696,7 @@ pub struct Heatmap {
     data: Vec<Vec<f64>>,
     row_labels: Vec<String>,
     col_labels: Vec<String>,
+    #[allow(dead_code)]
     colors: Vec<Color>,
 }
 

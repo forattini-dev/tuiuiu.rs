@@ -283,11 +283,17 @@ impl MultiSelect {
             selected_labels.join(", ")
         };
 
+        let header_style = if self.disabled {
+            TextStyle { dim: true, ..Default::default() }
+        } else {
+            TextStyle::default()
+        };
+
         let mut children = vec![
-            VNode::styled_text(format!("{} ▼", display), TextStyle::default())
+            VNode::styled_text(format!("{} ▼", display), header_style)
         ];
 
-        if self.open {
+        if self.open && !self.disabled {
             for (idx, opt) in self.options.iter().enumerate() {
                 let is_selected = self.selected.contains(&idx);
                 let checkbox = if is_selected { "☑" } else { "☐" };

@@ -580,7 +580,7 @@ fn layout_children(
     let total_with_gaps = total_final_main + total_gap;
     let extra_space = main_size.saturating_sub(total_with_gaps);
 
-    let (mut main_pos, space_between, space_around) = match style.justify_content {
+    let (mut main_pos, space_between, _space_around) = match style.justify_content {
         JustifyContent::FlexStart => (0, 0, 0),
         JustifyContent::FlexEnd => (extra_space, 0, 0),
         JustifyContent::Center => (extra_space / 2, 0, 0),

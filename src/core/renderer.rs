@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 use crate::core::layout::{ComputedLayout, LayoutNode, calculate_layout};
-use crate::core::component::{VNode, BoxNode, TextNode, Color, NamedColor, BorderStyle, TextStyle};
+use crate::core::component::{VNode, Color, NamedColor, BorderStyle, TextStyle};
 
 // =============================================================================
 // Render Context

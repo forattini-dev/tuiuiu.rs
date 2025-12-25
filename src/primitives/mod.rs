@@ -17,10 +17,10 @@ mod divider;
 mod canvas;
 mod control_flow;
 
-pub use box_component::BoxComponent;
-pub use text::Text;
-pub use spacer::{Spacer, Newline};
-pub use fragment::Fragment;
-pub use divider::Divider;
-pub use canvas::Canvas;
-pub use control_flow::{When, Each, Transform, Static, Slot};
+pub use box_component::{BoxComponent, box_, column, row};
+pub use text::{Text, text};
+pub use spacer::{Spacer, Newline, spacer, newline};
+pub use fragment::{Fragment, fragment};
+pub use divider::{Divider, divider, vdivider};
+pub use canvas::{Canvas, canvas};
+pub use control_flow::{When, Each, Transform, Static, Slot, when, each};

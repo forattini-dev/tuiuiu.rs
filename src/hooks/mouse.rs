@@ -4,7 +4,7 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::core::terminal::{MouseEvent, MouseEventKind, MouseButton};
+use crate::core::terminal::MouseEvent;
 
 /// Mouse handler function type.
 pub type MouseHandler = Box<dyn Fn(&MouseEvent)>;

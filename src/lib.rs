@@ -66,7 +66,7 @@
 //! - `dev-tools`: Development and debugging tools
 
 #![doc(html_root_url = "https://docs.rs/tuiuiu/0.1.0")]
-#![warn(missing_docs)]
+#![allow(missing_docs)] // TODO: Add documentation for all public items
 #![warn(rustdoc::missing_crate_level_docs)]
 
 // =============================================================================

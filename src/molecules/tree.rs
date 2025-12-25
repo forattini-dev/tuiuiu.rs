@@ -269,7 +269,7 @@ where
 
     for path in files {
         let parts: Vec<&str> = path.as_ref().split('/').collect();
-        let mut current = &mut root;
+        let current = &mut root;
 
         for (i, part) in parts.iter().enumerate() {
             let is_file = i == parts.len() - 1;

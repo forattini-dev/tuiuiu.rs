@@ -17,12 +17,12 @@ mod focus;
 mod terminal;
 mod hotkeys;
 
-pub use state::{use_state, use_reducer, State};
-pub use effects::{use_effect, use_memo, use_callback};
-pub use input::{use_input, use_key, InputHandler};
-pub use mouse::{use_mouse, MouseHandler};
+pub use state::{use_state, use_reducer, use_ref, use_lazy_state, use_toggle, use_counter, State};
+pub use effects::{use_effect, use_memo, use_callback, use_mount, use_cleanup};
+pub use input::{use_input, use_key, dispatch_key_event, clear_input_handlers, key_matches, InputHandler};
+pub use mouse::{use_mouse, dispatch_mouse_event, clear_mouse_handlers, use_mouse_position, MouseHandler, MousePosition};
 pub use focus::{use_focus, use_focus_manager, FocusOptions, FocusResult};
-pub use terminal::{use_terminal_size, use_fps, UseFpsResult};
+pub use terminal::{use_terminal_size, use_fps, use_dimensions, UseFpsResult};
 pub use hotkeys::{
     use_hotkeys, HotkeyBinding, HotkeyHandler, HotkeyOptions,
     register_hotkey, trigger_hotkey, get_registered_hotkeys,

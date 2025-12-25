@@ -2,7 +2,6 @@
 //!
 //! Local reactive state management.
 
-use std::rc::Rc;
 use crate::core::signals::{create_signal, create_reducer, ReadSignal, WriteSignal};
 
 /// State handle returned by use_state.

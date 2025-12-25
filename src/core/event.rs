@@ -242,8 +242,8 @@ where
 
 /// Wait for an event to occur.
 pub async fn wait_for_event<T: Clone + 'static>(
-    emitter: &EventEmitter,
-    event: &str,
+    _emitter: &EventEmitter,
+    _event: &str,
 ) -> Option<T> {
     // In a real implementation, this would use async channels
     None

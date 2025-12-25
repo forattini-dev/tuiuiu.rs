@@ -6,7 +6,7 @@ use crate::core::focus::{
     Focusable, focus_element, focus_next, focus_previous, 
     is_focused, register_focusable, get_active_id,
 };
-use crate::core::signals::{create_signal, ReadSignal, WriteSignal};
+use crate::core::signals::{create_signal, ReadSignal};
 
 /// Focus options.
 #[derive(Debug, Clone, Default)]

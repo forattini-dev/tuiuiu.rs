@@ -182,6 +182,7 @@ impl From<Static> for VNode {
 
 /// Named slot for content injection.
 pub struct Slot {
+    #[allow(dead_code)]
     name: String,
     default: Option<Vec<VNode>>,
 }

@@ -524,8 +524,11 @@ fn parse_input<R: Read>(initial: &[u8], reader: &mut R) -> io::Result<Option<Ter
     if first < 32 {
         let key = match first {
             0 => Key::Null,
-            1..=26 => {
-                // Ctrl+A through Ctrl+Z
+            9 => Key::Tab,      // Tab (before Ctrl range to handle specifically)
+            10 | 13 => Key::Enter, // Enter/Return
+            27 => Key::Escape,
+            1..=8 | 11..=12 | 14..=26 => {
+                // Ctrl+A through Ctrl+Z (excluding Tab=9, Enter=10,13, Esc=27)
                 let c = (first + b'a' - 1) as char;
                 return Ok(Some(TerminalEvent::Key(KeyEvent {
                     key: Key::Char(c),
@@ -535,10 +538,6 @@ fn parse_input<R: Read>(initial: &[u8], reader: &mut R) -> io::Result<Option<Ter
                     },
                 })));
             }
-            9 => Key::Tab,
-            10 | 13 => Key::Enter,
-            27 => Key::Escape,
-            127 => Key::Backspace,
             _ => Key::Null,
         };
         return Ok(Some(TerminalEvent::Key(KeyEvent::simple(key))));
