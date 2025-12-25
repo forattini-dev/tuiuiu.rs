@@ -1,0 +1,60 @@
+[package]
+name = "tuiuiu"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Zero-dependency Terminal UI library with signal-based reactivity and flexbox layout"
+license = "MIT"
+repository = "https://github.com/tetis-io/tuiuiu.rs"
+homepage = "https://github.com/tetis-io/tuiuiu.rs"
+documentation = "https://docs.rs/tuiuiu"
+readme = "README.md"
+keywords = ["terminal", "tui", "cli", "ui", "signals", "flexbox", "reactive"]
+categories = ["command-line-interface", "gui"]
+
+[features]
+default = ["full"]
+full = ["atoms", "molecules", "organisms", "templates", "themes", "mcp"]
+core = []
+primitives = ["core"]
+atoms = ["primitives"]
+molecules = ["atoms"]
+organisms = ["molecules"]
+templates = ["organisms"]
+themes = []
+mcp = []
+dev-tools = []
+
+[dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+
+[[bin]]
+name = "tuiuiu"
+path = "src/bin/main.rs"
+
+[[example]]
+name = "counter"
+path = "examples/01_counter.rs"
+
+[[example]]
+name = "dashboard"
+path = "examples/02_dashboard.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 0
+
+[lints.rust]
+# unsafe_code = "forbid" # Needed for raw terminal mode
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
