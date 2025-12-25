@@ -242,7 +242,7 @@ Why Rust?
 
 ```bash
 # Clone the repo
-git clone https://github.com/tetis-io/tuiuiu.rs
+git clone https://github.com/forattini-dev/tuiuiu.rs
 cd tuiuiu.rs
 
 # Run examples
