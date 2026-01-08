@@ -86,7 +86,7 @@ pub use core::layout::{
     calculate_layout,
 };
 
-pub use core::renderer::{OutputBuffer, RenderContext, render_to_string};
+pub use core::renderer::{OutputBuffer, RenderContext, render_to_string, measure_height};
 
 pub use core::app::{App, RenderOptions, render, render_once};
 
@@ -156,8 +156,14 @@ pub mod atoms;
 
 #[cfg(feature = "atoms")]
 pub use atoms::{
-    Button, TextInput, Switch, Slider, Spinner, ProgressBar, Timer,
-    Checkbox, Badge, Link, Tooltip, Icon,
+    Button, TextInput,
+    Switch, SwitchState, SwitchSize,
+    Badge, BadgeVariant,
+    Checkbox, CheckboxState, CheckboxValue,
+    Slider, SliderState, SliderMode,
+    Scrollbar, ScrollbarMode,
+    Spinner, ProgressBar, Timer,
+    Link, Tooltip, Icon,
 };
 
 // =============================================================================
@@ -184,8 +190,8 @@ pub mod organisms;
 
 #[cfg(feature = "organisms")]
 pub use organisms::{
-    Modal, CommandPalette, DataTable, FileManager, SplitPanel, ScrollArea,
-    Grid, OverlayStack, Notification, Toast,
+    Modal, CommandPalette, DataTable, FileBrowser, SplitPanel, ScrollArea,
+    Grid, OverlayStack, Notification, Toast, ScrollList,
 };
 
 // =============================================================================
@@ -199,6 +205,7 @@ pub mod templates;
 pub use templates::{
     AppShell, Page, Header, StatusBar, Footer, Sidebar,
     VStack, HStack, Center, FullScreen, Container,
+    VAlign, HAlign, HJustify, LayoutProps,
 };
 
 // =============================================================================
@@ -210,8 +217,16 @@ pub mod themes;
 
 #[cfg(feature = "themes")]
 pub use themes::{
-    Theme, ThemeMode, use_theme, get_theme, set_theme, create_theme,
-    dark_theme, light_theme, monokai_theme, dracula_theme, nord_theme,
+    // Core types
+    Theme, ThemeMode, ThemeMeta, ThemePalette,
+    ThemeBackground, ThemeForeground, ThemeAccents, ThemeStates, ThemeBorders,
+    // Theme management
+    use_theme, get_theme, set_theme, create_theme, get_theme_by_name, list_themes,
+    // Built-in themes
+    dark_theme, light_theme, dracula_theme,
+    // Colors
+    ColorScale, Shade, get_color, parse_color, get_contrast_color, resolve_color,
+    WHITE, BLACK, SLATE, BLUE, GREEN, RED, AMBER, CYAN,
 };
 
 // =============================================================================

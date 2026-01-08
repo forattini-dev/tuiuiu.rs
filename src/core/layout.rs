@@ -443,25 +443,34 @@ fn calculate_node_layout(
 
     let style = &node.style;
 
+    // Calculate margins
+    let margin = &style.margin;
+    let margin_h = margin.horizontal();
+    let margin_v = margin.vertical();
+
     // Calculate this node's size
     let padding_h = style.padding.horizontal() + style.border_width * 2;
     let padding_v = style.padding.vertical() + style.border_width * 2;
 
-    // Resolve width/height
+    // Available space after margins
+    let available_for_content_w = available_width.saturating_sub(margin_h);
+    let available_for_content_h = available_height.saturating_sub(margin_v);
+
+    // Resolve width/height (using margin-reduced available space)
     let mut width = match style.width {
         Size::Fixed(w) => w,
-        Size::Percent(p) => ((available_width as f32) * p / 100.0).round() as u16,
-        Size::Auto | Size::Fill => available_width,
+        Size::Percent(p) => ((available_for_content_w as f32) * p / 100.0).round() as u16,
+        Size::Auto | Size::Fill => available_for_content_w,
     };
 
     let mut height = match style.height {
         Size::Fixed(h) => h,
-        Size::Percent(p) => ((available_height as f32) * p / 100.0).round() as u16,
+        Size::Percent(p) => ((available_for_content_h as f32) * p / 100.0).round() as u16,
         Size::Auto | Size::Fill => {
             if node.children.is_empty() {
                 node.content_size.1 + padding_v
             } else {
-                available_height
+                available_for_content_h
             }
         }
     };
@@ -480,9 +489,9 @@ fn calculate_node_layout(
         height = height.min(max);
     }
 
-    // Apply position if specified
-    let final_x = style.position_x.unwrap_or(x);
-    let final_y = style.position_y.unwrap_or(y);
+    // Apply position if specified, including margin offset
+    let final_x = style.position_x.unwrap_or(x + margin.left);
+    let final_y = style.position_y.unwrap_or(y + margin.top);
 
     // Store this node's layout
     layouts.insert(
@@ -679,6 +688,8 @@ fn calculate_child_base_size(
     let style = &child.style;
     let padding_h = style.padding.horizontal() + style.border_width * 2;
     let padding_v = style.padding.vertical() + style.border_width * 2;
+    let margin_h = style.margin.horizontal();
+    let margin_v = style.margin.vertical();
 
     // Calculate base width
     let base_width = match style.width {
@@ -750,7 +761,8 @@ fn calculate_child_base_size(
     let constrained_w = apply_constraints(final_w, style.min_width, style.max_width);
     let constrained_h = apply_constraints(final_h, style.min_height, style.max_height);
 
-    (constrained_w, constrained_h)
+    // Include margins in total space occupied
+    (constrained_w + margin_h, constrained_h + margin_v)
 }
 
 fn apply_constraints(value: u16, min: Option<u16>, max: Option<u16>) -> u16 {

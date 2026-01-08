@@ -788,3 +788,621 @@ impl Heatmap {
         })
     }
 }
+
+// =============================================================================
+// RadarChart
+// =============================================================================
+
+/// A single axis on the radar chart.
+#[derive(Debug, Clone)]
+pub struct RadarAxis {
+    /// Axis label
+    pub label: String,
+    /// Maximum value for this axis
+    pub max: f64,
+}
+
+impl RadarAxis {
+    /// Create a new axis.
+    pub fn new(label: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            max: 100.0,
+        }
+    }
+
+    /// Set maximum value.
+    pub fn max(mut self, max: f64) -> Self {
+        self.max = max;
+        self
+    }
+}
+
+/// A data series for the radar chart.
+#[derive(Debug, Clone)]
+pub struct RadarSeries {
+    /// Series label
+    pub label: String,
+    /// Values for each axis
+    pub values: Vec<f64>,
+    /// Series color
+    pub color: Option<Color>,
+}
+
+impl RadarSeries {
+    /// Create a new series.
+    pub fn new(label: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            values: Vec::new(),
+            color: None,
+        }
+    }
+
+    /// Set values.
+    pub fn values<I>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = f64>,
+    {
+        self.values = values.into_iter().collect();
+        self
+    }
+
+    /// Set color.
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+}
+
+/// Radar (spider) chart component.
+#[derive(Debug, Clone)]
+pub struct RadarChart {
+    axes: Vec<RadarAxis>,
+    series: Vec<RadarSeries>,
+    size: u16,
+    show_legend: bool,
+    show_labels: bool,
+    show_values: bool,
+    fill: bool,
+}
+
+impl Default for RadarChart {
+    fn default() -> Self {
+        Self {
+            axes: Vec::new(),
+            series: Vec::new(),
+            size: 15,
+            show_legend: true,
+            show_labels: true,
+            show_values: false,
+            fill: false,
+        }
+    }
+}
+
+impl RadarChart {
+    /// Create a new radar chart.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Set axes from labels.
+    pub fn axes<I, S>(mut self, labels: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        self.axes = labels.into_iter().map(|s| RadarAxis::new(s)).collect();
+        self
+    }
+
+    /// Set axes with custom config.
+    pub fn with_axes<I>(mut self, axes: I) -> Self
+    where
+        I: IntoIterator<Item = RadarAxis>,
+    {
+        self.axes = axes.into_iter().collect();
+        self
+    }
+
+    /// Add a data series.
+    pub fn series(mut self, series: RadarSeries) -> Self {
+        self.series.push(series);
+        self
+    }
+
+    /// Add data with label.
+    pub fn data<I>(mut self, label: impl Into<String>, values: I) -> Self
+    where
+        I: IntoIterator<Item = f64>,
+    {
+        self.series.push(RadarSeries::new(label).values(values));
+        self
+    }
+
+    /// Set size (radius in characters).
+    pub fn size(mut self, size: u16) -> Self {
+        self.size = size;
+        self
+    }
+
+    /// Show legend.
+    pub fn legend(mut self, show: bool) -> Self {
+        self.show_legend = show;
+        self
+    }
+
+    /// Show axis labels.
+    pub fn labels(mut self, show: bool) -> Self {
+        self.show_labels = show;
+        self
+    }
+
+    /// Show values on chart.
+    pub fn values(mut self, show: bool) -> Self {
+        self.show_values = show;
+        self
+    }
+
+    /// Fill the shape.
+    pub fn fill(mut self, fill: bool) -> Self {
+        self.fill = fill;
+        self
+    }
+
+    /// Build the VNode.
+    pub fn build(self) -> VNode {
+        if self.axes.is_empty() || self.series.is_empty() {
+            return VNode::styled_text("No data", TextStyle::color(Color::Named(NamedColor::Gray)));
+        }
+
+        let n = self.axes.len();
+        let radius = self.size as f64;
+        let center = self.size;
+        let grid_size = (self.size * 2 + 1) as usize;
+
+        // Create a 2D grid
+        let mut grid = vec![vec![' '; grid_size]; grid_size];
+
+        // Draw axes
+        for (i, axis) in self.axes.iter().enumerate() {
+            let angle = 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
+
+            // Draw axis line
+            for r in 0..=self.size {
+                let x = (center as f64 + r as f64 * angle.cos()).round() as usize;
+                let y = (center as f64 + r as f64 * angle.sin()).round() as usize;
+
+                if x < grid_size && y < grid_size {
+                    grid[y][x] = if r == 0 { '·' } else { '·' };
+                }
+            }
+
+            // Draw label at end of axis
+            if self.show_labels {
+                let label_x = (center as f64 + (radius + 1.0) * angle.cos()).round() as usize;
+                let label_y = (center as f64 + (radius + 1.0) * angle.sin()).round() as usize;
+
+                if label_x < grid_size && label_y < grid_size {
+                    // Put first char of label
+                    if let Some(c) = axis.label.chars().next() {
+                        grid[label_y][label_x] = c;
+                    }
+                }
+            }
+        }
+
+        // Draw data points and connect them
+        let _colors = [
+            Color::Named(NamedColor::Cyan),
+            Color::Named(NamedColor::Green),
+            Color::Named(NamedColor::Magenta),
+            Color::Named(NamedColor::Yellow),
+        ];
+
+        for (series_idx, series) in self.series.iter().enumerate() {
+            let char = ['●', '◆', '■', '▲'][series_idx % 4];
+            let mut points = Vec::new();
+
+            for (i, &value) in series.values.iter().enumerate() {
+                if i >= n {
+                    break;
+                }
+
+                let max_val = self.axes.get(i).map(|a| a.max).unwrap_or(100.0);
+                let normalized = (value / max_val).min(1.0);
+                let r = normalized * radius;
+
+                let angle = 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
+                let x = (center as f64 + r * angle.cos()).round() as usize;
+                let y = (center as f64 + r * angle.sin()).round() as usize;
+
+                points.push((x, y));
+
+                if x < grid_size && y < grid_size {
+                    grid[y][x] = char;
+                }
+            }
+
+            // Connect points with lines
+            if points.len() > 1 {
+                for i in 0..points.len() {
+                    let (x1, y1) = points[i];
+                    let (x2, y2) = points[(i + 1) % points.len()];
+
+                    // Simple Bresenham line
+                    let dx = (x2 as i32 - x1 as i32).abs();
+                    let dy = (y2 as i32 - y1 as i32).abs();
+                    let steps = dx.max(dy);
+
+                    if steps > 0 {
+                        for step in 1..steps {
+                            let t = step as f64 / steps as f64;
+                            let x = (x1 as f64 + t * (x2 as f64 - x1 as f64)).round() as usize;
+                            let y = (y1 as f64 + t * (y2 as f64 - y1 as f64)).round() as usize;
+
+                            if x < grid_size && y < grid_size && grid[y][x] == ' ' {
+                                grid[y][x] = if self.fill { '░' } else { '·' };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Draw center
+        grid[center as usize][center as usize] = '┼';
+
+        // Convert grid to VNodes
+        let mut children: Vec<VNode> = grid.into_iter().map(|row| {
+            VNode::styled_text(
+                row.into_iter().collect::<String>(),
+                TextStyle::color(Color::Named(NamedColor::White))
+            )
+        }).collect();
+
+        // Legend
+        if self.show_legend {
+            let legend_parts: Vec<String> = self.series.iter().enumerate()
+                .map(|(i, s)| {
+                    let char = ['●', '◆', '■', '▲'][i % 4];
+                    format!("{} {}", char, s.label)
+                })
+                .collect();
+
+            children.push(VNode::styled_text(
+                legend_parts.join("  "),
+                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+            ));
+        }
+
+        VNode::Box(BoxNode {
+            children,
+            style: BoxStyle::default(),
+            ..Default::default()
+        })
+    }
+}
+
+// =============================================================================
+// ScatterPlot
+// =============================================================================
+
+/// A data point on the scatter plot.
+#[derive(Debug, Clone, Copy)]
+pub struct ScatterPoint {
+    /// X coordinate
+    pub x: f64,
+    /// Y coordinate
+    pub y: f64,
+}
+
+impl ScatterPoint {
+    /// Create a new point.
+    pub fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
+    }
+}
+
+impl From<(f64, f64)> for ScatterPoint {
+    fn from((x, y): (f64, f64)) -> Self {
+        Self { x, y }
+    }
+}
+
+/// A data series for the scatter plot.
+#[derive(Debug, Clone)]
+pub struct ScatterSeries {
+    /// Series label
+    pub label: String,
+    /// Data points
+    pub points: Vec<ScatterPoint>,
+    /// Series color
+    pub color: Option<Color>,
+    /// Point character
+    pub marker: Option<char>,
+}
+
+impl ScatterSeries {
+    /// Create a new series.
+    pub fn new(label: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            points: Vec::new(),
+            color: None,
+            marker: None,
+        }
+    }
+
+    /// Set points from tuples.
+    pub fn points<I>(mut self, points: I) -> Self
+    where
+        I: IntoIterator<Item = (f64, f64)>,
+    {
+        self.points = points.into_iter().map(ScatterPoint::from).collect();
+        self
+    }
+
+    /// Set points directly.
+    pub fn with_points<I>(mut self, points: I) -> Self
+    where
+        I: IntoIterator<Item = ScatterPoint>,
+    {
+        self.points = points.into_iter().collect();
+        self
+    }
+
+    /// Set color.
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    /// Set marker character.
+    pub fn marker(mut self, marker: char) -> Self {
+        self.marker = Some(marker);
+        self
+    }
+}
+
+/// Scatter plot component.
+#[derive(Debug, Clone)]
+pub struct ScatterPlot {
+    series: Vec<ScatterSeries>,
+    width: u16,
+    height: u16,
+    x_range: Option<(f64, f64)>,
+    y_range: Option<(f64, f64)>,
+    show_axes: bool,
+    show_legend: bool,
+    show_grid: bool,
+    x_label: Option<String>,
+    y_label: Option<String>,
+}
+
+impl Default for ScatterPlot {
+    fn default() -> Self {
+        Self {
+            series: Vec::new(),
+            width: 40,
+            height: 15,
+            x_range: None,
+            y_range: None,
+            show_axes: true,
+            show_legend: true,
+            show_grid: false,
+            x_label: None,
+            y_label: None,
+        }
+    }
+}
+
+impl ScatterPlot {
+    /// Create a new scatter plot.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Add a data series.
+    pub fn series(mut self, series: ScatterSeries) -> Self {
+        self.series.push(series);
+        self
+    }
+
+    /// Add data from tuples.
+    pub fn data<I>(mut self, label: impl Into<String>, points: I) -> Self
+    where
+        I: IntoIterator<Item = (f64, f64)>,
+    {
+        self.series.push(ScatterSeries::new(label).points(points));
+        self
+    }
+
+    /// Set dimensions.
+    pub fn size(mut self, width: u16, height: u16) -> Self {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    /// Set X axis range.
+    pub fn x_range(mut self, min: f64, max: f64) -> Self {
+        self.x_range = Some((min, max));
+        self
+    }
+
+    /// Set Y axis range.
+    pub fn y_range(mut self, min: f64, max: f64) -> Self {
+        self.y_range = Some((min, max));
+        self
+    }
+
+    /// Show axes.
+    pub fn axes(mut self, show: bool) -> Self {
+        self.show_axes = show;
+        self
+    }
+
+    /// Show legend.
+    pub fn legend(mut self, show: bool) -> Self {
+        self.show_legend = show;
+        self
+    }
+
+    /// Show grid.
+    pub fn grid(mut self, show: bool) -> Self {
+        self.show_grid = show;
+        self
+    }
+
+    /// Set X axis label.
+    pub fn x_label(mut self, label: impl Into<String>) -> Self {
+        self.x_label = Some(label.into());
+        self
+    }
+
+    /// Set Y axis label.
+    pub fn y_label(mut self, label: impl Into<String>) -> Self {
+        self.y_label = Some(label.into());
+        self
+    }
+
+    /// Build the VNode.
+    pub fn build(self) -> VNode {
+        if self.series.is_empty() {
+            return VNode::styled_text("No data", TextStyle::color(Color::Named(NamedColor::Gray)));
+        }
+
+        // Collect all points to determine range
+        let all_points: Vec<&ScatterPoint> = self.series.iter()
+            .flat_map(|s| &s.points)
+            .collect();
+
+        if all_points.is_empty() {
+            return VNode::styled_text("No data", TextStyle::color(Color::Named(NamedColor::Gray)));
+        }
+
+        // Determine ranges
+        let (x_min, x_max) = self.x_range.unwrap_or_else(|| {
+            let min = all_points.iter().map(|p| p.x).fold(f64::INFINITY, f64::min);
+            let max = all_points.iter().map(|p| p.x).fold(f64::NEG_INFINITY, f64::max);
+            let padding = (max - min) * 0.05;
+            (min - padding, max + padding)
+        });
+
+        let (y_min, y_max) = self.y_range.unwrap_or_else(|| {
+            let min = all_points.iter().map(|p| p.y).fold(f64::INFINITY, f64::min);
+            let max = all_points.iter().map(|p| p.y).fold(f64::NEG_INFINITY, f64::max);
+            let padding = (max - min) * 0.05;
+            (min - padding, max + padding)
+        });
+
+        let x_range = x_max - x_min;
+        let y_range = y_max - y_min;
+
+        // Create grid
+        let mut grid = vec![vec![' '; self.width as usize]; self.height as usize];
+
+        // Draw grid if enabled
+        if self.show_grid {
+            for y in 0..self.height as usize {
+                for x in 0..self.width as usize {
+                    if y == self.height as usize / 2 || x == self.width as usize / 2 {
+                        grid[y][x] = '·';
+                    }
+                }
+            }
+        }
+
+        // Draw axes
+        if self.show_axes {
+            // Y axis
+            for y in 0..self.height as usize {
+                grid[y][0] = '│';
+            }
+
+            // X axis
+            for x in 0..self.width as usize {
+                grid[self.height as usize - 1][x] = '─';
+            }
+
+            // Origin
+            grid[self.height as usize - 1][0] = '└';
+        }
+
+        // Plot points
+        let markers = ['●', '◆', '■', '▲', '○', '◇', '□', '△'];
+
+        for (series_idx, series) in self.series.iter().enumerate() {
+            let marker = series.marker.unwrap_or(markers[series_idx % markers.len()]);
+
+            for point in &series.points {
+                // Normalize to grid coordinates
+                let x = if x_range > 0.0 {
+                    ((point.x - x_min) / x_range * (self.width - 1) as f64) as usize
+                } else {
+                    self.width as usize / 2
+                };
+
+                let y = if y_range > 0.0 {
+                    ((y_max - point.y) / y_range * (self.height - 1) as f64) as usize
+                } else {
+                    self.height as usize / 2
+                };
+
+                if x < self.width as usize && y < self.height as usize {
+                    grid[y][x] = marker;
+                }
+            }
+        }
+
+        // Convert to VNodes
+        let mut children: Vec<VNode> = Vec::new();
+
+        // Add Y axis label
+        if let Some(label) = &self.y_label {
+            children.push(VNode::styled_text(
+                label.clone(),
+                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+            ));
+        }
+
+        // Add grid rows
+        for row in grid {
+            children.push(VNode::styled_text(
+                row.into_iter().collect::<String>(),
+                TextStyle::color(Color::Named(NamedColor::White))
+            ));
+        }
+
+        // Add X axis label
+        if let Some(label) = &self.x_label {
+            children.push(VNode::styled_text(
+                format!("{:>width$}", label, width = self.width as usize),
+                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+            ));
+        }
+
+        // Add legend
+        if self.show_legend {
+            let legend_parts: Vec<String> = self.series.iter().enumerate()
+                .map(|(i, s)| {
+                    let marker = s.marker.unwrap_or(markers[i % markers.len()]);
+                    format!("{} {}", marker, s.label)
+                })
+                .collect();
+
+            children.push(VNode::styled_text(
+                legend_parts.join("  "),
+                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+            ));
+        }
+
+        VNode::Box(BoxNode {
+            children,
+            style: BoxStyle::default(),
+            ..Default::default()
+        })
+    }
+}
