@@ -5,7 +5,7 @@
 //! - Spinner, ProgressBar, Timer
 //! - Checkbox, Badge, Link, Tooltip, Icon, Tag
 //! - StatusIndicator, BigText, Digits
-//! - MetricDisplay, Picture
+//! - MetricDisplay, Picture, Skeleton
 
 mod button;
 mod text_input;
@@ -26,6 +26,7 @@ mod big_text;
 mod digits;
 mod metric_display;
 mod picture;
+mod skeleton;
 
 pub use button::Button;
 pub use text_input::TextInput;
@@ -53,4 +54,8 @@ pub use picture::{
     ColoredPicture, Pixel, PixelGrid, ColorPalette,
     create_pixel_grid, create_pixel_grid_from_colors,
     AsciiPatterns, create_banner, rainbow_text,
+};
+pub use skeleton::{
+    Skeleton, SkeletonText, SkeletonCard,
+    SkeletonChars, SKELETON_ASCII, SKELETON_BLOCKS, SKELETON_DOTS,
 };

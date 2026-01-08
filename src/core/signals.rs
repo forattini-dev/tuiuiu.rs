@@ -30,7 +30,7 @@
 //! ```
 
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
@@ -50,18 +50,37 @@ pub fn reset_id_counter() {
 }
 
 // =============================================================================
+// Subscriber Types
+// =============================================================================
+
+/// A subscriber that can be notified when a signal changes.
+#[derive(Clone)]
+enum Subscriber {
+    Effect(Rc<EffectInner>),
+    Memo(Rc<dyn MemoSubscriber>),
+}
+
+trait MemoSubscriber {
+    fn invalidate(&self);
+    fn id(&self) -> u64;
+}
+
+// =============================================================================
 // Runtime Context
 // =============================================================================
 
 thread_local! {
-    /// Current tracking context for automatic dependency collection
-    static TRACKING: RefCell<Option<Rc<RefCell<HashSet<u64>>>>> = const { RefCell::new(None) };
+    /// Current tracking context - stores (signal_id -> subscriber) mappings
+    static CURRENT_SUBSCRIBER: RefCell<Option<Subscriber>> = const { RefCell::new(None) };
+
+    /// Global signal registry - maps signal IDs to their subscribers
+    static SIGNAL_SUBSCRIBERS: RefCell<HashMap<u64, Vec<Subscriber>>> = RefCell::new(HashMap::new());
 
     /// Batch update flag
     static BATCHING: Cell<bool> = const { Cell::new(false) };
 
-    /// Pending effects during batch
-    static PENDING_EFFECTS: RefCell<Vec<Rc<dyn Fn()>>> = const { RefCell::new(Vec::new()) };
+    /// Pending effects during batch (stores effect IDs to deduplicate)
+    static PENDING_EFFECTS: RefCell<Vec<Rc<EffectInner>>> = const { RefCell::new(Vec::new()) };
 
     /// All registered effects for cleanup
     static EFFECTS: RefCell<Vec<Rc<EffectInner>>> = const { RefCell::new(Vec::new()) };
@@ -94,9 +113,25 @@ impl<T: Clone> ReadSignal<T> {
 
     /// Track this signal as a dependency without reading the value.
     pub fn track(&self) {
-        TRACKING.with(|tracking| {
-            if let Some(deps) = tracking.borrow().as_ref() {
-                deps.borrow_mut().insert(self.inner.id);
+        let signal_id = self.inner.id;
+        CURRENT_SUBSCRIBER.with(|current| {
+            if let Some(subscriber) = current.borrow().as_ref() {
+                // Add this subscriber to the signal's subscriber list
+                SIGNAL_SUBSCRIBERS.with(|subs| {
+                    let mut subs = subs.borrow_mut();
+                    let subscribers = subs.entry(signal_id).or_insert_with(Vec::new);
+
+                    // Check if already subscribed (avoid duplicates)
+                    let already_subscribed = subscribers.iter().any(|s| match (s, subscriber) {
+                        (Subscriber::Effect(a), Subscriber::Effect(b)) => Rc::ptr_eq(a, b),
+                        (Subscriber::Memo(a), Subscriber::Memo(b)) => a.id() == b.id(),
+                        _ => false,
+                    });
+
+                    if !already_subscribed {
+                        subscribers.push(subscriber.clone());
+                    }
+                });
             }
         });
     }
@@ -144,17 +179,41 @@ impl<T: Clone + 'static> WriteSignal<T> {
 
     /// Notify all dependents that the value has changed.
     fn notify(&self) {
-        let subscribers: Vec<_> = self.inner.subscribers.borrow().clone();
+        let signal_id = self.inner.id;
+
+        // Get subscribers from the global registry
+        let subscribers: Vec<Subscriber> = SIGNAL_SUBSCRIBERS.with(|subs| {
+            subs.borrow()
+                .get(&signal_id)
+                .cloned()
+                .unwrap_or_default()
+        });
 
         if is_batching() {
-            // Queue effects for later
-            PENDING_EFFECTS.with(|pending| {
-                pending.borrow_mut().extend(subscribers);
-            });
+            // Queue effects for later (only effects, memos invalidate immediately)
+            for subscriber in subscribers {
+                match subscriber {
+                    Subscriber::Effect(effect) => {
+                        PENDING_EFFECTS.with(|pending| {
+                            pending.borrow_mut().push(effect);
+                        });
+                    }
+                    Subscriber::Memo(memo) => {
+                        memo.invalidate();
+                    }
+                }
+            }
         } else {
-            // Execute effects immediately
-            for effect in subscribers {
-                effect();
+            // Execute immediately
+            for subscriber in subscribers {
+                match subscriber {
+                    Subscriber::Effect(effect) => {
+                        run_effect(&effect);
+                    }
+                    Subscriber::Memo(memo) => {
+                        memo.invalidate();
+                    }
+                }
             }
         }
     }
@@ -180,7 +239,6 @@ impl<T: Clone + std::fmt::Debug> std::fmt::Debug for WriteSignal<T> {
 struct SignalInner<T> {
     id: u64,
     value: RefCell<T>,
-    subscribers: RefCell<Vec<Rc<dyn Fn()>>>,
 }
 
 // =============================================================================
@@ -206,7 +264,6 @@ pub fn create_signal<T: Clone + 'static>(initial: T) -> (ReadSignal<T>, WriteSig
     let inner = Rc::new(SignalInner {
         id: next_id(),
         value: RefCell::new(initial),
-        subscribers: RefCell::new(Vec::new()),
     });
 
     (
@@ -229,13 +286,29 @@ pub struct Effect {
 struct EffectInner {
     id: u64,
     callback: RefCell<Box<dyn Fn()>>,
+    #[allow(dead_code)]
     dependencies: RefCell<HashSet<u64>>,
 }
 
 impl Effect {
     /// Stop this effect from running.
     pub fn dispose(&self) {
-        // Clear dependencies
+        // Clear dependencies and unsubscribe from all signals
+        let deps = self.inner.dependencies.borrow().clone();
+        SIGNAL_SUBSCRIBERS.with(|subs| {
+            let mut subs = subs.borrow_mut();
+            for signal_id in deps {
+                if let Some(subscribers) = subs.get_mut(&signal_id) {
+                    subscribers.retain(|s| {
+                        if let Subscriber::Effect(e) = s {
+                            !Rc::ptr_eq(e, &self.inner)
+                        } else {
+                            true
+                        }
+                    });
+                }
+            }
+        });
         self.inner.dependencies.borrow_mut().clear();
     }
 
@@ -283,24 +356,18 @@ pub fn create_effect<F: Fn() + 'static>(callback: F) -> Effect {
 }
 
 fn run_effect(inner: &Rc<EffectInner>) {
-    // Create a new dependency set
-    let deps = Rc::new(RefCell::new(HashSet::new()));
-
-    // Set as current tracking context
-    TRACKING.with(|tracking| {
-        *tracking.borrow_mut() = Some(Rc::clone(&deps));
+    // Set this effect as the current subscriber
+    let prev_subscriber = CURRENT_SUBSCRIBER.with(|current| {
+        current.borrow_mut().replace(Subscriber::Effect(Rc::clone(inner)))
     });
 
-    // Run the callback
+    // Run the callback - signal reads will auto-subscribe
     (inner.callback.borrow())();
 
-    // Clear tracking context
-    TRACKING.with(|tracking| {
-        *tracking.borrow_mut() = None;
+    // Restore previous subscriber
+    CURRENT_SUBSCRIBER.with(|current| {
+        *current.borrow_mut() = prev_subscriber;
     });
-
-    // Store collected dependencies
-    *inner.dependencies.borrow_mut() = deps.borrow().clone();
 }
 
 // =============================================================================
@@ -323,35 +390,59 @@ struct MemoInner<T> {
     dependencies: RefCell<HashSet<u64>>,
 }
 
-impl<T: Clone> Memo<T> {
+impl<T: Clone + 'static> MemoSubscriber for MemoInner<T> {
+    fn invalidate(&self) {
+        // Clear the cached value so it recomputes on next get()
+        *self.cached.borrow_mut() = None;
+    }
+
+    fn id(&self) -> u64 {
+        self.id
+    }
+}
+
+impl<T: Clone + 'static> Memo<T> {
     /// Get the memoized value, recomputing if necessary.
     pub fn get(&self) -> T {
-        // Track this memo as a dependency
-        TRACKING.with(|tracking| {
-            if let Some(deps) = tracking.borrow().as_ref() {
-                deps.borrow_mut().insert(self.inner.id);
+        // Check cache first before any tracking
+        {
+            let cached = self.inner.cached.borrow();
+            if let Some(ref value) = *cached {
+                return value.clone();
             }
+        }
+
+        // Set this memo as the current subscriber
+        let prev_subscriber = CURRENT_SUBSCRIBER.with(|current| {
+            current.borrow_mut().replace(Subscriber::Memo(Rc::clone(&self.inner) as Rc<dyn MemoSubscriber>))
         });
 
-        // Return cached value or compute
-        if let Some(cached) = self.inner.cached.borrow().clone() {
-            cached
-        } else {
-            let value = (self.inner.compute)();
-            *self.inner.cached.borrow_mut() = Some(value.clone());
-            value
-        }
+        // Compute the value - signal reads will auto-subscribe
+        let value = (self.inner.compute)();
+        *self.inner.cached.borrow_mut() = Some(value.clone());
+
+        // Restore previous subscriber
+        CURRENT_SUBSCRIBER.with(|current| {
+            *current.borrow_mut() = prev_subscriber;
+        });
+
+        value
     }
 
     /// Get the value without tracking as a dependency.
     pub fn get_untracked(&self) -> T {
-        if let Some(cached) = self.inner.cached.borrow().clone() {
-            cached
-        } else {
-            let value = (self.inner.compute)();
-            *self.inner.cached.borrow_mut() = Some(value.clone());
-            value
+        // Check cache first
+        {
+            let cached = self.inner.cached.borrow();
+            if let Some(ref value) = *cached {
+                return value.clone();
+            }
         }
+
+        // Compute without tracking
+        let value = (self.inner.compute)();
+        *self.inner.cached.borrow_mut() = Some(value.clone());
+        value
     }
 
     /// Get the memo's unique ID.
@@ -360,7 +451,7 @@ impl<T: Clone> Memo<T> {
     }
 }
 
-impl<T: Clone> Clone for Memo<T> {
+impl<T: Clone + 'static> Clone for Memo<T> {
     fn clone(&self) -> Self {
         Self {
             inner: Rc::clone(&self.inner),
@@ -368,7 +459,7 @@ impl<T: Clone> Clone for Memo<T> {
     }
 }
 
-impl<T: Clone + std::fmt::Debug> std::fmt::Debug for Memo<T> {
+impl<T: Clone + std::fmt::Debug + 'static> std::fmt::Debug for Memo<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Memo")
             .field("id", &self.inner.id)
@@ -445,14 +536,14 @@ pub fn batch<F: FnOnce() -> R, R>(f: F) -> R {
         BATCHING.with(|b| b.set(false));
 
         // Run all pending effects
-        let effects: Vec<_> = PENDING_EFFECTS.with(|pending| pending.borrow_mut().drain(..).collect());
+        let effects: Vec<Rc<EffectInner>> = PENDING_EFFECTS.with(|pending| pending.borrow_mut().drain(..).collect());
 
         // Deduplicate and run
         let mut seen = HashSet::new();
         for effect in effects {
-            let ptr = Rc::as_ptr(&effect) as *const () as usize;
+            let ptr = Rc::as_ptr(&effect) as usize;
             if seen.insert(ptr) {
-                effect();
+                run_effect(&effect);
             }
         }
     }
@@ -484,9 +575,10 @@ pub fn batch<F: FnOnce() -> R, R>(f: F) -> R {
 /// set_b.set(20); // Effect does NOT run (b was untracked)
 /// ```
 pub fn untrack<F: FnOnce() -> R, R>(f: F) -> R {
-    let prev = TRACKING.with(|tracking| tracking.borrow_mut().take());
+    // Temporarily clear the current subscriber
+    let prev = CURRENT_SUBSCRIBER.with(|current| current.borrow_mut().take());
     let result = f();
-    TRACKING.with(|tracking| *tracking.borrow_mut() = prev);
+    CURRENT_SUBSCRIBER.with(|current| *current.borrow_mut() = prev);
     result
 }
 
