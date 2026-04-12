@@ -3,9 +3,9 @@
 //! Converts the component tree into terminal output with ANSI escape codes.
 //! Handles double-buffering, diffing, and efficient updates.
 
+use crate::core::component::{BorderStyle, Color, NamedColor, TextStyle, VNode};
+use crate::core::layout::{calculate_layout, ComputedLayout, LayoutNode};
 use std::collections::HashMap;
-use crate::core::layout::{ComputedLayout, LayoutNode, calculate_layout};
-use crate::core::component::{VNode, Color, NamedColor, BorderStyle, TextStyle};
 
 // =============================================================================
 // Render Context
@@ -276,8 +276,10 @@ impl OutputBuffer {
             for x in 0..self.width {
                 if let Some(cell) = self.get(x, y) {
                     // Apply style changes
-                    if cell.fg != last_fg || cell.bg != last_bg
-                        || cell.bold != last_bold || cell.dim != last_dim
+                    if cell.fg != last_fg
+                        || cell.bg != last_bg
+                        || cell.bold != last_bold
+                        || cell.dim != last_dim
                     {
                         output.push_str("\x1B[0m"); // Reset
 
@@ -541,7 +543,8 @@ fn calculate_full_height(node: &VNode, layouts: &HashMap<u64, ComputedLayout>, i
                 // Check children for any that extend beyond
                 let mut max_child_height = base_height;
                 for (i, child) in box_node.children.iter().enumerate() {
-                    let child_height = calculate_full_height(child, layouts, node_id * 1000 + i as u64);
+                    let child_height =
+                        calculate_full_height(child, layouts, node_id * 1000 + i as u64);
                     max_child_height = max_child_height.max(child_height);
                 }
 
@@ -675,7 +678,9 @@ fn vnode_to_layout_node(node: &VNode, id: u64) -> LayoutNode {
 
             // Children
             for (i, child) in box_node.children.iter().enumerate() {
-                layout.children.push(vnode_to_layout_node(child, node_id * 1000 + i as u64));
+                layout
+                    .children
+                    .push(vnode_to_layout_node(child, node_id * 1000 + i as u64));
             }
 
             layout
@@ -684,13 +689,13 @@ fn vnode_to_layout_node(node: &VNode, id: u64) -> LayoutNode {
             let width = text_node.content.chars().count() as u16;
             LayoutNode::text(id, width, 1)
         }
-        VNode::Spacer(spacer) => {
-            LayoutNode::text(id, spacer.x, spacer.y.max(1))
-        }
+        VNode::Spacer(spacer) => LayoutNode::text(id, spacer.x, spacer.y.max(1)),
         VNode::Fragment(children) => {
             let mut layout = LayoutNode::new(id);
             for (i, child) in children.iter().enumerate() {
-                layout.children.push(vnode_to_layout_node(child, id * 1000 + i as u64));
+                layout
+                    .children
+                    .push(vnode_to_layout_node(child, id * 1000 + i as u64));
             }
             layout
         }
@@ -701,7 +706,7 @@ fn vnode_to_layout_node(node: &VNode, id: u64) -> LayoutNode {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::component::{BoxNode, BoxStyle, TextNode, EventHandlers};
+    use crate::core::component::{BoxNode, BoxStyle, EventHandlers, TextNode};
 
     #[test]
     fn test_output_buffer() {
@@ -751,10 +756,7 @@ mod tests {
     #[test]
     fn test_measure_height_simple_text() {
         // Simple text without margins should be 1 line
-        let node = make_box(
-            BoxStyle::default(),
-            vec![make_text("Hello")],
-        );
+        let node = make_box(BoxStyle::default(), vec![make_text("Hello")]);
         assert_eq!(measure_height(&node, 80), 1);
     }
 
@@ -795,13 +797,7 @@ mod tests {
         style.flex_direction = Some(crate::core::layout::FlexDirection::Column);
         style.margin = Some(1);
 
-        let node = make_box(
-            style,
-            vec![
-                make_text("Line 1"),
-                make_text("Line 2"),
-            ],
-        );
+        let node = make_box(style, vec![make_text("Line 1"), make_text("Line 2")]);
         // Actual Rust behavior: with 2 lines in column, margin affects positioning
         // Note: margin calculation differs slightly from JS (children laid out in flex)
         assert_eq!(measure_height(&node, 80), 2);
@@ -854,10 +850,7 @@ mod tests {
 
     #[test]
     fn test_measure_height_fragment() {
-        let node = VNode::Fragment(vec![
-            make_text("First"),
-            make_text("Second"),
-        ]);
+        let node = VNode::Fragment(vec![make_text("First"), make_text("Second")]);
         // Fragments pass through to children
         assert!(measure_height(&node, 80) >= 1);
     }

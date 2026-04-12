@@ -2,15 +2,15 @@
 //!
 //! Keyboard input handling.
 
+use crate::core::terminal::{Key, KeyEvent, KeyModifiers};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::core::terminal::{Key, KeyModifiers, KeyEvent};
 
 /// Input handler function type.
 pub type InputHandler = Box<dyn Fn(&Key, &KeyModifiers)>;
 
 thread_local! {
-    static INPUT_HANDLERS: RefCell<Vec<Rc<dyn Fn(&Key, &KeyModifiers)>>> = 
+    static INPUT_HANDLERS: RefCell<Vec<Rc<dyn Fn(&Key, &KeyModifiers)>>> =
         const { RefCell::new(Vec::new()) };
 }
 

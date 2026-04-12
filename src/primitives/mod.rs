@@ -10,17 +10,26 @@
 //! - `Canvas`: Low-level drawing
 
 mod box_component;
-mod text;
-mod spacer;
-mod fragment;
-mod divider;
 mod canvas;
 mod control_flow;
+mod divider;
+mod fragment;
+mod spacer;
+mod store;
+mod text;
 
-pub use box_component::{BoxComponent, box_, column, row};
-pub use text::{Text, text};
-pub use spacer::{Spacer, Newline, spacer, newline};
-pub use fragment::{Fragment, fragment};
-pub use divider::{Divider, divider, vdivider};
-pub use canvas::{Canvas, canvas};
-pub use control_flow::{When, Each, Transform, Static, Slot, when, each};
+pub use box_component::{box_, column, row, BoxComponent};
+pub use canvas::{canvas, Canvas};
+pub use control_flow::{each, when, Each, Slot, Static, Transform, When};
+pub use divider::{divider, vdivider, Divider};
+pub use fragment::{fragment, Fragment};
+pub use spacer::{newline, spacer, Newline, Spacer};
+pub use store::{
+    applyMiddleware, apply_middleware, createLoggerMiddleware, createPersistMiddleware,
+    createPersistedStore, createReactiveStore, createStore, create_logger_middleware,
+    create_persist_middleware, create_persisted_store, create_reactive_store, create_store, Action,
+    AnyAction, Dispatch, Middleware, MiddlewareAPI, PersistDeserializer, PersistOptions,
+    PersistSerializer, PersistedStoreOptions, ReactiveStore, Reducer, Store, StoreCreator,
+    StoreEnhancer, SyncStorageAdapter,
+};
+pub use text::{text, Text};

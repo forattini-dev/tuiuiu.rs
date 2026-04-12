@@ -11,7 +11,9 @@
 //! └─────────────────
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection};
 use crate::core::signals::create_signal;
 
@@ -288,7 +290,9 @@ impl From<Collapsible> for VNode {
 }
 
 /// Create reactive collapsible state
-pub fn create_collapsible_state(expanded: bool) -> (
+pub fn create_collapsible_state(
+    expanded: bool,
+) -> (
     crate::core::signals::ReadSignal<CollapsibleState>,
     crate::core::signals::WriteSignal<CollapsibleState>,
 ) {
@@ -369,9 +373,7 @@ mod tests {
 
     #[test]
     fn test_collapsible_custom_icons() {
-        let collapsible = Collapsible::new("Section")
-            .icons("+", "-")
-            .build();
+        let collapsible = Collapsible::new("Section").icons("+", "-").build();
         matches!(collapsible, VNode::Box(_));
     }
 }

@@ -350,7 +350,12 @@ mod tests {
         ] {
             assert_eq!(easing.apply(0.0), 0.0);
             let end = easing.apply(1.0);
-            assert!((end - 1.0).abs() < 0.001, "Easing {:?} end: {}", easing, end);
+            assert!(
+                (end - 1.0).abs() < 0.001,
+                "Easing {:?} end: {}",
+                easing,
+                end
+            );
         }
     }
 

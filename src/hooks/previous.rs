@@ -15,7 +15,7 @@
 //! // prev_count.get() == Some(0) (the previous value)
 //! ```
 
-use crate::core::signals::{create_signal, create_effect, ReadSignal};
+use crate::core::signals::{create_effect, create_signal, ReadSignal};
 use std::cell::RefCell;
 
 // =============================================================================

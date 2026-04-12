@@ -2,7 +2,7 @@
 //!
 //! Data visualization components for terminal.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 // =============================================================================
 // Sparkline
@@ -138,7 +138,11 @@ impl Sparkline {
         if self.show_min_max {
             children.push(VNode::styled_text(
                 format!("min: {:.1} max: {:.1}", min, max),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -293,9 +297,9 @@ impl BarChart {
             return VNode::styled_text("No data", TextStyle::color(Color::Named(NamedColor::Gray)));
         }
 
-        let max_value = self.max_value.unwrap_or_else(|| {
-            self.items.iter().map(|i| i.value).fold(0.0, f64::max)
-        });
+        let max_value = self
+            .max_value
+            .unwrap_or_else(|| self.items.iter().map(|i| i.value).fold(0.0, f64::max));
 
         let max_label_len = self.items.iter().map(|i| i.label.len()).max().unwrap_or(0);
 
@@ -305,7 +309,9 @@ impl BarChart {
             BarOrientation::Horizontal => {
                 for item in &self.items {
                     let bar_len = if max_value > 0.0 {
-                        ((item.value / max_value) * (self.width as f64 - max_label_len as f64 - 4.0)) as usize
+                        ((item.value / max_value)
+                            * (self.width as f64 - max_label_len as f64 - 4.0))
+                            as usize
                     } else {
                         0
                     };
@@ -340,12 +346,18 @@ impl BarChart {
 
                     let mut row_text = String::new();
                     for item in &self.items {
-                        let normalized = if max_value > 0.0 { item.value / max_value } else { 0.0 };
+                        let normalized = if max_value > 0.0 {
+                            item.value / max_value
+                        } else {
+                            0.0
+                        };
 
                         let char = if normalized >= threshold {
                             '█'
                         } else if normalized > threshold - (1.0 / height as f64) {
-                            let partial = ((normalized - (threshold - 1.0 / height as f64)) * height as f64 * 8.0) as usize;
+                            let partial = ((normalized - (threshold - 1.0 / height as f64))
+                                * height as f64
+                                * 8.0) as usize;
                             bar_chars[partial.min(7)]
                         } else {
                             ' '
@@ -359,12 +371,17 @@ impl BarChart {
                 }
 
                 // Labels
-                let labels: String = self.items.iter()
+                let labels: String = self
+                    .items
+                    .iter()
                     .map(|i| format!("{:.1}", i.label.chars().next().unwrap_or(' ')))
                     .collect::<Vec<_>>()
                     .join(" ");
 
-                children.push(VNode::styled_text(labels, TextStyle::color(Color::Named(NamedColor::Gray))));
+                children.push(VNode::styled_text(
+                    labels,
+                    TextStyle::color(Color::Named(NamedColor::Gray)),
+                ));
             }
         }
 
@@ -479,7 +496,8 @@ impl Gauge {
     /// Add color threshold.
     pub fn threshold(mut self, value: f64, color: Color) -> Self {
         self.thresholds.push((value, color));
-        self.thresholds.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        self.thresholds
+            .sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
         self
     }
 
@@ -656,16 +674,22 @@ impl LineChart {
             }
         }
 
-        let mut children: Vec<VNode> = grid.into_iter().map(|row| {
-            VNode::styled_text(
-                row.into_iter().collect::<String>(),
-                TextStyle::color(Color::Named(NamedColor::White))
-            )
-        }).collect();
+        let mut children: Vec<VNode> = grid
+            .into_iter()
+            .map(|row| {
+                VNode::styled_text(
+                    row.into_iter().collect::<String>(),
+                    TextStyle::color(Color::Named(NamedColor::White)),
+                )
+            })
+            .collect();
 
         // Legend
         if self.show_legend && !self.labels.is_empty() {
-            let legend_parts: Vec<String> = self.labels.iter().enumerate()
+            let legend_parts: Vec<String> = self
+                .labels
+                .iter()
+                .enumerate()
                 .map(|(i, label)| {
                     let char = ['●', '◆', '■', '▲'][i % 4];
                     format!("{} {}", char, label)
@@ -674,7 +698,11 @@ impl LineChart {
 
             children.push(VNode::styled_text(
                 legend_parts.join("  "),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -765,19 +793,24 @@ impl Heatmap {
         let mut children = Vec::new();
 
         for (row_idx, row) in self.data.iter().enumerate() {
-            let row_label = self.row_labels.get(row_idx)
+            let row_label = self
+                .row_labels
+                .get(row_idx)
                 .map(|s| format!("{:>8} ", s))
                 .unwrap_or_default();
 
-            let cells: String = row.iter().map(|&v| {
-                let normalized = if range > 0.0 { (v - min) / range } else { 0.5 };
-                let idx = (normalized * (heat_chars.len() - 1) as f64) as usize;
-                heat_chars[idx.min(heat_chars.len() - 1)]
-            }).collect();
+            let cells: String = row
+                .iter()
+                .map(|&v| {
+                    let normalized = if range > 0.0 { (v - min) / range } else { 0.5 };
+                    let idx = (normalized * (heat_chars.len() - 1) as f64) as usize;
+                    heat_chars[idx.min(heat_chars.len() - 1)]
+                })
+                .collect();
 
             children.push(VNode::styled_text(
                 format!("{}{}", row_label, cells),
-                TextStyle::color(Color::Named(NamedColor::Yellow))
+                TextStyle::color(Color::Named(NamedColor::Yellow)),
             ));
         }
 
@@ -967,7 +1000,8 @@ impl RadarChart {
 
         // Draw axes
         for (i, axis) in self.axes.iter().enumerate() {
-            let angle = 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
+            let angle =
+                2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
 
             // Draw axis line
             for r in 0..=self.size {
@@ -1014,7 +1048,8 @@ impl RadarChart {
                 let normalized = (value / max_val).min(1.0);
                 let r = normalized * radius;
 
-                let angle = 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
+                let angle =
+                    2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
                 let x = (center as f64 + r * angle.cos()).round() as usize;
                 let y = (center as f64 + r * angle.sin()).round() as usize;
 
@@ -1055,16 +1090,22 @@ impl RadarChart {
         grid[center as usize][center as usize] = '┼';
 
         // Convert grid to VNodes
-        let mut children: Vec<VNode> = grid.into_iter().map(|row| {
-            VNode::styled_text(
-                row.into_iter().collect::<String>(),
-                TextStyle::color(Color::Named(NamedColor::White))
-            )
-        }).collect();
+        let mut children: Vec<VNode> = grid
+            .into_iter()
+            .map(|row| {
+                VNode::styled_text(
+                    row.into_iter().collect::<String>(),
+                    TextStyle::color(Color::Named(NamedColor::White)),
+                )
+            })
+            .collect();
 
         // Legend
         if self.show_legend {
-            let legend_parts: Vec<String> = self.series.iter().enumerate()
+            let legend_parts: Vec<String> = self
+                .series
+                .iter()
+                .enumerate()
                 .map(|(i, s)| {
                     let char = ['●', '◆', '■', '▲'][i % 4];
                     format!("{} {}", char, s.label)
@@ -1073,7 +1114,11 @@ impl RadarChart {
 
             children.push(VNode::styled_text(
                 legend_parts.join("  "),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -1275,9 +1320,7 @@ impl ScatterPlot {
         }
 
         // Collect all points to determine range
-        let all_points: Vec<&ScatterPoint> = self.series.iter()
-            .flat_map(|s| &s.points)
-            .collect();
+        let all_points: Vec<&ScatterPoint> = self.series.iter().flat_map(|s| &s.points).collect();
 
         if all_points.is_empty() {
             return VNode::styled_text("No data", TextStyle::color(Color::Named(NamedColor::Gray)));
@@ -1286,14 +1329,20 @@ impl ScatterPlot {
         // Determine ranges
         let (x_min, x_max) = self.x_range.unwrap_or_else(|| {
             let min = all_points.iter().map(|p| p.x).fold(f64::INFINITY, f64::min);
-            let max = all_points.iter().map(|p| p.x).fold(f64::NEG_INFINITY, f64::max);
+            let max = all_points
+                .iter()
+                .map(|p| p.x)
+                .fold(f64::NEG_INFINITY, f64::max);
             let padding = (max - min) * 0.05;
             (min - padding, max + padding)
         });
 
         let (y_min, y_max) = self.y_range.unwrap_or_else(|| {
             let min = all_points.iter().map(|p| p.y).fold(f64::INFINITY, f64::min);
-            let max = all_points.iter().map(|p| p.y).fold(f64::NEG_INFINITY, f64::max);
+            let max = all_points
+                .iter()
+                .map(|p| p.y)
+                .fold(f64::NEG_INFINITY, f64::max);
             let padding = (max - min) * 0.05;
             (min - padding, max + padding)
         });
@@ -1364,7 +1413,11 @@ impl ScatterPlot {
         if let Some(label) = &self.y_label {
             children.push(VNode::styled_text(
                 label.clone(),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -1372,7 +1425,7 @@ impl ScatterPlot {
         for row in grid {
             children.push(VNode::styled_text(
                 row.into_iter().collect::<String>(),
-                TextStyle::color(Color::Named(NamedColor::White))
+                TextStyle::color(Color::Named(NamedColor::White)),
             ));
         }
 
@@ -1380,13 +1433,20 @@ impl ScatterPlot {
         if let Some(label) = &self.x_label {
             children.push(VNode::styled_text(
                 format!("{:>width$}", label, width = self.width as usize),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
         // Add legend
         if self.show_legend {
-            let legend_parts: Vec<String> = self.series.iter().enumerate()
+            let legend_parts: Vec<String> = self
+                .series
+                .iter()
+                .enumerate()
                 .map(|(i, s)| {
                     let marker = s.marker.unwrap_or(markers[i % markers.len()]);
                     format!("{} {}", marker, s.label)
@@ -1395,7 +1455,11 @@ impl ScatterPlot {
 
             children.push(VNode::styled_text(
                 legend_parts.join("  "),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 

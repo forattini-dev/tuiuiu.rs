@@ -9,19 +9,15 @@ fn main() -> std::io::Result<()> {
     let (count, set_count) = create_signal(0);
 
     // Build the UI
-    let ui = Box::new()
-        .column()
-        .padding(1)
-        .border_round()
-        .children([
-            Text::new("🐦 Tuiuiu Counter").cyan().bold().build(),
-            Text::new(format!("Count: {}", count.get())).build(),
-            Text::new("↑/↓: change • Esc: exit").gray().dim().build(),
-        ]);
+    let ui = Box::new().column().padding(1).border_round().children([
+        Text::new("🐦 Tuiuiu Counter").cyan().bold().build(),
+        Text::new(format!("Count: {}", count.get())).build(),
+        Text::new("↑/↓: change • Esc: exit").gray().dim().build(),
+    ]);
 
     // Render and get the output
     let output = tuiuiu::core::renderer::render_to_string(&ui.build(), 40, 10);
-    
+
     println!("{}", output);
     println!();
     println!("(Interactive mode not yet implemented)");

@@ -2,7 +2,7 @@
 //!
 //! Conditional rendering and iteration helpers.
 
-use crate::core::component::{VNode, Child, children_to_vnodes};
+use crate::core::component::{children_to_vnodes, Child, VNode};
 
 /// Conditional rendering - shows children only when condition is true.
 pub struct When {
@@ -82,7 +82,8 @@ where
 
     /// Build into a VNode.
     pub fn build(self) -> VNode {
-        let children: Vec<_> = self.items
+        let children: Vec<_> = self
+            .items
             .iter()
             .enumerate()
             .map(|(i, item)| (self.render)(item, i))
@@ -133,7 +134,8 @@ where
 
     /// Build into a VNode.
     pub fn build(self) -> VNode {
-        let transformed: Vec<_> = self.children
+        let transformed: Vec<_> = self
+            .children
             .into_iter()
             .map(|c| (self.transform)(c))
             .collect();
@@ -149,7 +151,9 @@ pub struct Static {
 impl Static {
     /// Create a Static component.
     pub fn new() -> Self {
-        Self { children: Vec::new() }
+        Self {
+            children: Vec::new(),
+        }
     }
 
     /// Set children.

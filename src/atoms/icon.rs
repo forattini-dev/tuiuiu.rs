@@ -295,9 +295,7 @@ mod tests {
 
     #[test]
     fn test_icon_with_label() {
-        let icon = Icon::new(icons::HOME)
-            .label("Home")
-            .build();
+        let icon = Icon::new(icons::HOME).label("Home").build();
         if let VNode::Text(node) = icon {
             assert!(node.content.contains("Home"));
             assert!(node.content.contains(icons::HOME));

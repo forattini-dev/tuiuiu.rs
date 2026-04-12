@@ -2,15 +2,15 @@
 //!
 //! Mouse event handling.
 
+use crate::core::terminal::MouseEvent;
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::core::terminal::MouseEvent;
 
 /// Mouse handler function type.
 pub type MouseHandler = Box<dyn Fn(&MouseEvent)>;
 
 thread_local! {
-    static MOUSE_HANDLERS: RefCell<Vec<Rc<dyn Fn(&MouseEvent)>>> = 
+    static MOUSE_HANDLERS: RefCell<Vec<Rc<dyn Fn(&MouseEvent)>>> =
         const { RefCell::new(Vec::new()) };
 }
 

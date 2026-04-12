@@ -269,7 +269,8 @@ impl Slider {
         };
 
         // Calculate thumb position
-        let thumb_pos = ((normalized * (self.width - 1) as f64).round() as usize).min(self.width - 1);
+        let thumb_pos =
+            ((normalized * (self.width - 1) as f64).round() as usize).min(self.width - 1);
 
         // Get colors
         let track_color = hex_to_rgb(tokens.track_bg);
@@ -312,14 +313,20 @@ impl Slider {
                 if self.disabled {
                     output.push_str(&format!("\x1b[2m{}\x1b[0m", thumb_char));
                 } else {
-                    output.push_str(&format!("\x1b[1;38;2;{}m{}\x1b[0m", thumb_color, thumb_char));
+                    output.push_str(&format!(
+                        "\x1b[1;38;2;{}m{}\x1b[0m",
+                        thumb_color, thumb_char
+                    ));
                 }
             } else {
                 // Empty portion
                 if self.disabled {
                     output.push_str(&format!("\x1b[2m{}\x1b[0m", empty_char));
                 } else {
-                    output.push_str(&format!("\x1b[2;38;2;{}m{}\x1b[0m", track_color, empty_char));
+                    output.push_str(&format!(
+                        "\x1b[2;38;2;{}m{}\x1b[0m",
+                        track_color, empty_char
+                    ));
                 }
             }
         }
@@ -375,20 +382,14 @@ mod tests {
 
     #[test]
     fn test_slider_with_value() {
-        let slider = Slider::new()
-            .min(0)
-            .max(100)
-            .value(50)
-            .width(10);
+        let slider = Slider::new().min(0).max(100).value(50).width(10);
         let output = slider.render();
         assert!(output.contains("50")); // Value should be shown
     }
 
     #[test]
     fn test_slider_ascii_mode() {
-        let slider = Slider::new()
-            .mode(SliderMode::Ascii)
-            .value(50);
+        let slider = Slider::new().mode(SliderMode::Ascii).value(50);
         let output = slider.render();
         assert!(output.contains('>'));
         assert!(output.contains('=') || output.contains('-'));
@@ -396,9 +397,7 @@ mod tests {
 
     #[test]
     fn test_slider_with_label() {
-        let slider = Slider::new()
-            .label("Volume")
-            .value(75);
+        let slider = Slider::new().label("Volume").value(75);
         let output = slider.render();
         assert!(output.contains("Volume"));
     }
@@ -429,11 +428,7 @@ mod tests {
 
     #[test]
     fn test_slider_min_max() {
-        let slider = Slider::new()
-            .min(10)
-            .max(20)
-            .value(15)
-            .show_min_max(true);
+        let slider = Slider::new().min(10).max(20).value(15).show_min_max(true);
         let output = slider.render();
         assert!(output.contains("10"));
         assert!(output.contains("20"));

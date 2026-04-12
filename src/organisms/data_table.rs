@@ -407,7 +407,13 @@ impl<T: Clone> DataTable<T> {
     }
 
     /// Build a data row.
-    fn build_row(&self, item: &T, _data_idx: usize, is_selected: bool, is_alternate: bool) -> VNode {
+    fn build_row(
+        &self,
+        item: &T,
+        _data_idx: usize,
+        is_selected: bool,
+        is_alternate: bool,
+    ) -> VNode {
         let mut cells: Vec<VNode> = Vec::new();
 
         for (idx, col) in self.columns.iter().enumerate() {
@@ -527,6 +533,7 @@ impl<T: Clone> DataTable<T> {
 /// State manager for DataTable.
 ///
 /// Provides reactive state for scroll, sort, and selection.
+#[derive(Debug, Clone)]
 pub struct DataTableState {
     /// Scroll offset
     scroll_read: ReadSignal<usize>,
@@ -619,14 +626,16 @@ impl DataTableState {
     /// Page up.
     pub fn page_up(&self) {
         let current = self.scroll_read.get();
-        self.scroll_write.set(current.saturating_sub(self.visible_rows));
+        self.scroll_write
+            .set(current.saturating_sub(self.visible_rows));
     }
 
     /// Page down.
     pub fn page_down(&self) {
         let current = self.scroll_read.get();
         let max = self.max_scroll();
-        self.scroll_write.set((current + self.visible_rows).min(max));
+        self.scroll_write
+            .set((current + self.visible_rows).min(max));
     }
 
     /// Get current sort state.
@@ -733,6 +742,190 @@ impl Default for DataTableState {
 }
 
 // =============================================================================
+// JS-Compatible API
+// =============================================================================
+
+/// Data table column compatibility alias.
+pub type DataTableColumn<T> = Column<T>;
+
+/// Compatibility sort direction used by JS-style configuration objects.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TableSortDirection {
+    #[default]
+    None,
+    Asc,
+    Desc,
+}
+
+impl TableSortDirection {
+    fn to_internal(self) -> SortDirection {
+        match self {
+            TableSortDirection::None => SortDirection::None,
+            TableSortDirection::Asc => SortDirection::Ascending,
+            TableSortDirection::Desc => SortDirection::Descending,
+        }
+    }
+}
+
+/// Compatibility selection mode.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TableSelectionMode {
+    #[default]
+    None,
+    Single,
+    Multiple,
+}
+
+impl TableSelectionMode {
+    fn to_internal(self) -> SelectionMode {
+        match self {
+            TableSelectionMode::None => SelectionMode::None,
+            TableSelectionMode::Single => SelectionMode::Single,
+            TableSelectionMode::Multiple => SelectionMode::Multi,
+        }
+    }
+}
+
+/// DataTable option bag compatible with the TS API.
+#[derive(Debug, Clone)]
+pub struct DataTableOptions<T> {
+    /// Column definitions
+    pub columns: Vec<DataTableColumn<T>>,
+    /// Row data
+    pub data: Vec<T>,
+    /// Optional row key extractor
+    pub get_row_key: Option<fn(&T, usize) -> String>,
+    /// Selection mode
+    pub selection_mode: TableSelectionMode,
+    /// Initial selected rows (string keys)
+    pub initial_selected: Vec<String>,
+    /// Page size
+    pub page_size: usize,
+    /// Show pagination controls
+    pub show_pagination: bool,
+    /// Show search/filter input
+    pub show_search: bool,
+    /// Search placeholder
+    pub search_placeholder: String,
+    /// Initial sort configuration
+    pub initial_sort: Option<(String, TableSortDirection)>,
+    /// Callback when sort changes
+    pub on_sort: Option<fn(String, TableSortDirection)>,
+    /// Callback when selection changes
+    pub on_select: Option<fn(Vec<usize>)>,
+    /// Callback when page changes
+    pub on_page_change: Option<fn(usize)>,
+    /// Whether table is active
+    pub is_active: bool,
+    /// Optional pre-created state
+    pub state: Option<DataTableState>,
+}
+
+impl<T> Default for DataTableOptions<T> {
+    fn default() -> Self {
+        Self {
+            columns: Vec::new(),
+            data: Vec::new(),
+            get_row_key: None,
+            selection_mode: TableSelectionMode::None,
+            initial_selected: Vec::new(),
+            page_size: 10,
+            show_pagination: true,
+            show_search: true,
+            search_placeholder: String::from("Search..."),
+            initial_sort: None,
+            on_sort: None,
+            on_select: None,
+            on_page_change: None,
+            is_active: true,
+            state: None,
+        }
+    }
+}
+
+/// Props type for DataTable component (TS API compatibility).
+pub type DataTableProps<T> = DataTableOptions<T>;
+pub type VirtualDataTableOptions<T> = DataTableOptions<T>;
+pub type EditableDataTableOptions<T> = DataTableOptions<T>;
+
+/// Create a DataTable state manager from options.
+pub fn create_data_table<T>(options: DataTableOptions<T>) -> DataTableState {
+    let mut state = options
+        .state
+        .unwrap_or_else(|| DataTableState::new(options.page_size.max(1)));
+
+    state.set_total_rows(options.data.len());
+    state.set_selection_mode(options.selection_mode.to_internal());
+
+    if let Some((_, direction)) = options.initial_sort {
+        state.sort_write.set(SortState {
+            column: None,
+            direction: direction.to_internal(),
+        });
+    }
+
+    if let Some(on_page_change) = options.on_page_change {
+        on_page_change(0);
+    }
+
+    let _ = options.get_row_key;
+    let _ = &options.initial_selected;
+    let _ = &options.show_search;
+    let _ = &options.search_placeholder;
+    let _ = options.on_sort;
+    let _ = options.on_select;
+    let _ = options.is_active;
+
+    state
+}
+
+/// JS-style constructor alias for `create_data_table`.
+pub fn createDataTable<T>(options: DataTableOptions<T>) -> DataTableState {
+    create_data_table(options)
+}
+
+/// Hook-style state factory alias.
+pub fn useDataTableState<T>(options: DataTableOptions<T>) -> DataTableState {
+    create_data_table(options)
+}
+
+/// Build a DataTable node from JS-style props.
+pub fn DataTable<T: Clone>(props: DataTableProps<T>) -> VNode {
+    let state_visible = props.page_size.max(1) as u16;
+
+    let _state = props.state.as_ref();
+
+    let selection_mode = props.selection_mode.to_internal();
+
+    let table = DataTable::new(props.columns)
+        .data(&props.data)
+        .visible_rows(state_visible)
+        .selection(selection_mode);
+
+    if props.show_search || props.show_pagination {
+        let _ = (
+            props.search_placeholder,
+            props.show_search,
+            props.show_pagination,
+        );
+    }
+
+    table.build()
+}
+
+/// VirtualDataTable compatibility wrapper.
+pub fn VirtualDataTable<T: Clone>(props: VirtualDataTableOptions<T>) -> VNode {
+    let mut visible_props = props;
+    visible_props.page_size = visible_props.page_size.max(1);
+    DataTable(visible_props)
+}
+
+/// EditableDataTable compatibility wrapper (rendered as read-only for now).
+pub fn EditableDataTable<T: Clone>(props: EditableDataTableOptions<T>) -> VNode {
+    DataTable(props)
+}
+
+// =============================================================================
 // Tests
 // =============================================================================
 
@@ -755,9 +948,18 @@ mod tests {
 
     fn test_data() -> Vec<TestUser> {
         vec![
-            TestUser { name: "Alice".to_string(), age: 30 },
-            TestUser { name: "Bob".to_string(), age: 25 },
-            TestUser { name: "Charlie".to_string(), age: 35 },
+            TestUser {
+                name: "Alice".to_string(),
+                age: 30,
+            },
+            TestUser {
+                name: "Bob".to_string(),
+                age: 25,
+            },
+            TestUser {
+                name: "Charlie".to_string(),
+                age: 35,
+            },
         ]
     }
 

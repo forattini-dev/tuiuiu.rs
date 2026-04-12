@@ -36,7 +36,12 @@ pub struct LayoutRect {
 impl LayoutRect {
     /// Create a new layout rect.
     pub fn new(x: u16, y: u16, width: u16, height: u16) -> Self {
-        Self { x, y, width, height }
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
     /// Create an empty layout rect.
@@ -168,11 +173,7 @@ impl LayoutRef {
     pub fn set_position(&self, x: u16, y: u16) {
         let current = self.rect.get_untracked();
         if current.x != x || current.y != y {
-            self.set_rect.set(LayoutRect {
-                x,
-                y,
-                ..current
-            });
+            self.set_rect.set(LayoutRect { x, y, ..current });
         }
     }
 

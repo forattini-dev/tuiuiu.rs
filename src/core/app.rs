@@ -6,9 +6,9 @@ use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-use crate::core::terminal::{Terminal, TerminalEvent, Key};
-use crate::core::renderer::OutputBuffer;
 use crate::core::component::VNode;
+use crate::core::renderer::OutputBuffer;
+use crate::core::terminal::{Key, Terminal, TerminalEvent};
 
 // =============================================================================
 // App State

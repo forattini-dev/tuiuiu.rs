@@ -2,7 +2,7 @@
 //!
 //! Large ASCII art text display with multiple font styles.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// Big text font styles.
@@ -206,7 +206,11 @@ impl BigText {
     /// Render text to lines.
     fn render_lines(&self) -> Vec<String> {
         let height = match self.font {
-            BigTextFont::Block | BigTextFont::Standard | BigTextFont::Banner | BigTextFont::Shadow | BigTextFont::Doom => 5,
+            BigTextFont::Block
+            | BigTextFont::Standard
+            | BigTextFont::Banner
+            | BigTextFont::Shadow
+            | BigTextFont::Doom => 5,
             BigTextFont::Mini | BigTextFont::Slant | BigTextFont::Small => 3,
         };
 
@@ -215,9 +219,11 @@ impl BigText {
 
         for (idx, c) in self.text.chars().enumerate() {
             let patterns: Vec<&str> = match self.font {
-                BigTextFont::Block | BigTextFont::Standard | BigTextFont::Banner | BigTextFont::Shadow | BigTextFont::Doom => {
-                    Self::get_block_char(c).to_vec()
-                }
+                BigTextFont::Block
+                | BigTextFont::Standard
+                | BigTextFont::Banner
+                | BigTextFont::Shadow
+                | BigTextFont::Doom => Self::get_block_char(c).to_vec(),
                 BigTextFont::Mini | BigTextFont::Slant | BigTextFont::Small => {
                     Self::get_mini_char(c).to_vec()
                 }
@@ -237,7 +243,10 @@ impl BigText {
     /// Build the VNode.
     pub fn build(self) -> VNode {
         let lines = self.render_lines();
-        let base_color = self.color.clone().unwrap_or(Color::Named(NamedColor::White));
+        let base_color = self
+            .color
+            .clone()
+            .unwrap_or(Color::Named(NamedColor::White));
 
         let mut children: Vec<VNode> = Vec::new();
 
@@ -246,7 +255,10 @@ impl BigText {
                 if !gradient.is_empty() {
                     let ratio = idx as f32 / (lines.len() - 1).max(1) as f32;
                     let color_idx = ((gradient.len() - 1) as f32 * ratio) as usize;
-                    gradient.get(color_idx).cloned().unwrap_or(base_color.clone())
+                    gradient
+                        .get(color_idx)
+                        .cloned()
+                        .unwrap_or(base_color.clone())
                 } else {
                     base_color.clone()
                 }

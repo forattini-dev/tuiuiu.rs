@@ -21,7 +21,7 @@
 //! let custom = Badge::new("CUSTOM").color("#ff6600");
 //! ```
 
-use crate::themes::{get_theme, get_contrast_color};
+use crate::themes::{get_contrast_color, get_theme};
 
 // =============================================================================
 // Types
@@ -105,8 +105,12 @@ impl Badge {
                 BadgeVariant::Success => (tokens.success.bg, tokens.success.fg),
                 BadgeVariant::Warning => (tokens.warning.bg, tokens.warning.fg),
                 BadgeVariant::Danger => (tokens.danger.bg, tokens.danger.fg),
-                BadgeVariant::Primary => (theme.palette.primary.s500, theme.foreground.inverse.base),
-                BadgeVariant::Secondary => (theme.palette.secondary.s500, theme.foreground.inverse.base),
+                BadgeVariant::Primary => {
+                    (theme.palette.primary.s500, theme.foreground.inverse.base)
+                }
+                BadgeVariant::Secondary => {
+                    (theme.palette.secondary.s500, theme.foreground.inverse.base)
+                }
                 BadgeVariant::Default => (tokens.default.bg, tokens.default.fg),
             }
         };
@@ -117,10 +121,7 @@ impl Badge {
 
         format!(
             "\x1b[{}38;2;{};48;2;{}m {} \x1b[0m",
-            bold_code,
-            fg_rgb,
-            bg_rgb,
-            self.label
+            bold_code, fg_rgb, bg_rgb, self.label
         )
     }
 }

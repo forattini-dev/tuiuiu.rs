@@ -84,11 +84,21 @@ impl Style {
     pub fn apply(&self, s: &str) -> String {
         let mut codes: Vec<String> = Vec::new();
 
-        if self.bold { codes.push("1".to_string()); }
-        if self.dim { codes.push("2".to_string()); }
-        if self.italic { codes.push("3".to_string()); }
-        if self.underline { codes.push("4".to_string()); }
-        if self.inverse { codes.push("7".to_string()); }
+        if self.bold {
+            codes.push("1".to_string());
+        }
+        if self.dim {
+            codes.push("2".to_string());
+        }
+        if self.italic {
+            codes.push("3".to_string());
+        }
+        if self.underline {
+            codes.push("4".to_string());
+        }
+        if self.inverse {
+            codes.push("7".to_string());
+        }
 
         if let Some(fg) = &self.fg {
             codes.push(color_to_fg_code(fg));

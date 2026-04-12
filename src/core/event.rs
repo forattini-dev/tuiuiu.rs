@@ -222,7 +222,10 @@ pub struct DelegateOptions {
 }
 
 /// Create a delegated event handler.
-pub fn delegate<F, T>(selector: impl Fn(u64) -> bool + 'static, handler: F) -> impl Fn(&mut TuiEvent<T>)
+pub fn delegate<F, T>(
+    selector: impl Fn(u64) -> bool + 'static,
+    handler: F,
+) -> impl Fn(&mut TuiEvent<T>)
 where
     F: Fn(&mut TuiEvent<T>) + 'static,
     T: 'static,

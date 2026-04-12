@@ -2,10 +2,10 @@
 //!
 //! Keyboard shortcut management.
 
+use crate::core::hotkeys::{parse_hotkey, ParsedHotkey};
+use crate::core::terminal::{Key, KeyModifiers};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use crate::core::terminal::{Key, KeyModifiers};
-use crate::core::hotkeys::{parse_hotkey, ParsedHotkey};
 
 /// Hotkey binding.
 #[derive(Debug, Clone)]
@@ -52,11 +52,7 @@ where
 }
 
 /// Register a hotkey.
-pub fn register_hotkey<F: Fn() + 'static>(
-    pattern: &str,
-    handler: F,
-    options: HotkeyOptions,
-) {
+pub fn register_hotkey<F: Fn() + 'static>(pattern: &str, handler: F, options: HotkeyOptions) {
     let binding = HotkeyBinding {
         pattern: pattern.to_string(),
         parsed: parse_hotkey(pattern),
@@ -65,10 +61,9 @@ pub fn register_hotkey<F: Fn() + 'static>(
     };
 
     HOTKEYS.with(|hotkeys| {
-        hotkeys.borrow_mut().insert(
-            pattern.to_string(),
-            (binding, Box::new(handler)),
-        );
+        hotkeys
+            .borrow_mut()
+            .insert(pattern.to_string(), (binding, Box::new(handler)));
     });
 }
 
@@ -86,9 +81,7 @@ pub fn trigger_hotkey(pattern: &str) -> bool {
 
 /// Get all registered hotkeys.
 pub fn get_registered_hotkeys() -> Vec<HotkeyBinding> {
-    HOTKEYS.with(|hotkeys| {
-        hotkeys.borrow().values().map(|(b, _)| b.clone()).collect()
-    })
+    HOTKEYS.with(|hotkeys| hotkeys.borrow().values().map(|(b, _)| b.clone()).collect())
 }
 
 /// Get current hotkey scope.

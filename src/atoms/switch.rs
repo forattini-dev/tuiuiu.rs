@@ -12,7 +12,7 @@
 //! # Example
 //!
 //! ```rust
-//! use tuiuiu::atoms::Switch;
+//! use tuiuiu::atoms::{Switch, SwitchSize};
 //!
 //! // Basic switch
 //! let switch = Switch::new()
@@ -301,11 +301,17 @@ impl Switch {
         let switch_visual = match self.size {
             SwitchSize::Compact => {
                 if is_on {
-                    format!("\x1b[38;2;{}m●\x1b[2;38;2;{}m━\x1b[0m",
-                        hex_to_rgb(color_on), hex_to_rgb(background))
+                    format!(
+                        "\x1b[38;2;{}m●\x1b[2;38;2;{}m━\x1b[0m",
+                        hex_to_rgb(color_on),
+                        hex_to_rgb(background)
+                    )
                 } else {
-                    format!("\x1b[2;38;2;{}m━\x1b[0m\x1b[38;2;{}m○\x1b[0m",
-                        hex_to_rgb(background), hex_to_rgb(color_off))
+                    format!(
+                        "\x1b[2;38;2;{}m━\x1b[0m\x1b[38;2;{}m○\x1b[0m",
+                        hex_to_rgb(background),
+                        hex_to_rgb(color_off)
+                    )
                 }
             }
             SwitchSize::Normal => {
@@ -388,18 +394,14 @@ mod tests {
 
     #[test]
     fn test_switch_with_label() {
-        let switch = Switch::new()
-            .label("Dark mode")
-            .initial_value(true);
+        let switch = Switch::new().label("Dark mode").initial_value(true);
         let output = switch.render();
         assert!(output.contains("Dark mode"));
     }
 
     #[test]
     fn test_switch_compact() {
-        let switch = Switch::new()
-            .size(SwitchSize::Compact)
-            .initial_value(true);
+        let switch = Switch::new().size(SwitchSize::Compact).initial_value(true);
         let output = switch.render();
         assert!(output.contains("●"));
     }

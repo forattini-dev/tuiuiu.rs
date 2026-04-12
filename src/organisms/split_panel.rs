@@ -388,9 +388,7 @@ impl SplitPanelState {
 
     /// Set position.
     pub fn set_position(&self, position: u8) {
-        let clamped = position
-            .max(self.min_first)
-            .min(100 - self.min_second);
+        let clamped = position.max(self.min_first).min(100 - self.min_second);
         self.position_write.set(clamped);
     }
 

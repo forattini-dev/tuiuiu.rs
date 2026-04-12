@@ -12,7 +12,9 @@
 //! └────────────────────────┘
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent};
 use crate::core::signals::create_signal;
 
@@ -517,7 +519,9 @@ impl From<Combobox> for VNode {
 }
 
 /// Create reactive combobox state.
-pub fn create_combobox_state(options: Vec<ComboboxOption>) -> (
+pub fn create_combobox_state(
+    options: Vec<ComboboxOption>,
+) -> (
     crate::core::signals::ReadSignal<ComboboxState>,
     crate::core::signals::WriteSignal<ComboboxState>,
 ) {

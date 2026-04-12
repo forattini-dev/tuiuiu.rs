@@ -2,7 +2,7 @@
 //!
 //! Syntax-highlighted code display.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 /// Code block component.
 #[derive(Debug, Clone)]
@@ -53,12 +53,24 @@ impl CodeBlock {
     }
 
     /// Common language shortcuts.
-    pub fn rust(self) -> Self { self.language("rust") }
-    pub fn javascript(self) -> Self { self.language("javascript") }
-    pub fn typescript(self) -> Self { self.language("typescript") }
-    pub fn python(self) -> Self { self.language("python") }
-    pub fn json(self) -> Self { self.language("json") }
-    pub fn bash(self) -> Self { self.language("bash") }
+    pub fn rust(self) -> Self {
+        self.language("rust")
+    }
+    pub fn javascript(self) -> Self {
+        self.language("javascript")
+    }
+    pub fn typescript(self) -> Self {
+        self.language("typescript")
+    }
+    pub fn python(self) -> Self {
+        self.language("python")
+    }
+    pub fn json(self) -> Self {
+        self.language("json")
+    }
+    pub fn bash(self) -> Self {
+        self.language("bash")
+    }
 
     /// Show/hide line numbers.
     pub fn line_numbers(mut self, show: bool) -> Self {
@@ -93,9 +105,34 @@ impl CodeBlock {
 
         // Very basic syntax highlighting
         let keywords = match lang {
-            "rust" => vec!["fn", "let", "mut", "pub", "struct", "enum", "impl", "use", "mod", "if", "else", "match", "for", "while", "loop", "return", "self", "Self", "true", "false"],
-            "javascript" | "typescript" => vec!["function", "const", "let", "var", "if", "else", "for", "while", "return", "class", "import", "export", "async", "await", "true", "false", "null", "undefined"],
-            "python" => vec!["def", "class", "if", "elif", "else", "for", "while", "return", "import", "from", "as", "with", "try", "except", "True", "False", "None"],
+            "rust" => vec![
+                "fn", "let", "mut", "pub", "struct", "enum", "impl", "use", "mod", "if", "else",
+                "match", "for", "while", "loop", "return", "self", "Self", "true", "false",
+            ],
+            "javascript" | "typescript" => vec![
+                "function",
+                "const",
+                "let",
+                "var",
+                "if",
+                "else",
+                "for",
+                "while",
+                "return",
+                "class",
+                "import",
+                "export",
+                "async",
+                "await",
+                "true",
+                "false",
+                "null",
+                "undefined",
+            ],
+            "python" => vec![
+                "def", "class", "if", "elif", "else", "for", "while", "return", "import", "from",
+                "as", "with", "try", "except", "True", "False", "None",
+            ],
             _ => vec![],
         };
 
@@ -113,8 +150,14 @@ impl CodeBlock {
 
         // Check for keywords
         for kw in &keywords {
-            if trimmed.starts_with(kw) &&
-               (trimmed.len() == kw.len() || !trimmed.chars().nth(kw.len()).unwrap_or(' ').is_alphanumeric()) {
+            if trimmed.starts_with(kw)
+                && (trimmed.len() == kw.len()
+                    || !trimmed
+                        .chars()
+                        .nth(kw.len())
+                        .unwrap_or(' ')
+                        .is_alphanumeric())
+            {
                 return (line.to_string(), Color::Named(NamedColor::Magenta));
             }
         }
@@ -141,7 +184,11 @@ impl CodeBlock {
         if let Some(lang) = &self.language {
             children.push(VNode::styled_text(
                 format!(" {} ", lang),
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -158,7 +205,11 @@ impl CodeBlock {
             };
 
             let style = if is_highlighted {
-                TextStyle { color: Some(Color::Named(NamedColor::Yellow)), inverse: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Yellow)),
+                    inverse: true,
+                    ..Default::default()
+                }
             } else {
                 TextStyle::color(color)
             };
@@ -221,53 +272,74 @@ impl Markdown {
             if trimmed.starts_with("### ") {
                 children.push(VNode::styled_text(
                     format!("   {}", &trimmed[4..]),
-                    TextStyle { color: Some(Color::Named(NamedColor::Cyan)), bold: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Cyan)),
+                        bold: true,
+                        ..Default::default()
+                    },
                 ));
             } else if trimmed.starts_with("## ") {
                 children.push(VNode::styled_text(
                     format!("  {}", &trimmed[3..]),
-                    TextStyle { color: Some(Color::Named(NamedColor::Cyan)), bold: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Cyan)),
+                        bold: true,
+                        ..Default::default()
+                    },
                 ));
             } else if trimmed.starts_with("# ") {
                 children.push(VNode::styled_text(
                     trimmed[2..].to_string(),
-                    TextStyle { color: Some(Color::Named(NamedColor::Cyan)), bold: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Cyan)),
+                        bold: true,
+                        ..Default::default()
+                    },
                 ));
             }
             // Bullet points
             else if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
                 children.push(VNode::styled_text(
                     format!("  • {}", &trimmed[2..]),
-                    TextStyle::default()
+                    TextStyle::default(),
                 ));
             }
             // Numbered lists
-            else if trimmed.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false)
-                && trimmed.contains(". ") {
+            else if trimmed
+                .chars()
+                .next()
+                .map(|c| c.is_ascii_digit())
+                .unwrap_or(false)
+                && trimmed.contains(". ")
+            {
                 children.push(VNode::styled_text(
                     format!("  {}", trimmed),
-                    TextStyle::default()
+                    TextStyle::default(),
                 ));
             }
             // Code blocks (inline)
             else if trimmed.starts_with('`') && trimmed.ends_with('`') {
                 children.push(VNode::styled_text(
-                    trimmed[1..trimmed.len()-1].to_string(),
-                    TextStyle::color(Color::Named(NamedColor::Green))
+                    trimmed[1..trimmed.len() - 1].to_string(),
+                    TextStyle::color(Color::Named(NamedColor::Green)),
                 ));
             }
             // Blockquotes
             else if trimmed.starts_with("> ") {
                 children.push(VNode::styled_text(
                     format!("│ {}", &trimmed[2..]),
-                    TextStyle { color: Some(Color::Named(NamedColor::Gray)), italic: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Gray)),
+                        italic: true,
+                        ..Default::default()
+                    },
                 ));
             }
             // Horizontal rule
             else if trimmed == "---" || trimmed == "***" {
                 children.push(VNode::styled_text(
                     "─".repeat(self.width.unwrap_or(40) as usize),
-                    TextStyle::color(Color::Named(NamedColor::Gray))
+                    TextStyle::color(Color::Named(NamedColor::Gray)),
                 ));
             }
             // Bold and italic (simplified - just strip markers)

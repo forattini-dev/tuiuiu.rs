@@ -1,6 +1,6 @@
 //! Spacer and Newline Components
 
-use crate::core::component::{VNode, SpacerNode};
+use crate::core::component::{SpacerNode, VNode};
 
 /// Spacer component - creates empty space.
 #[derive(Debug, Clone, Default)]

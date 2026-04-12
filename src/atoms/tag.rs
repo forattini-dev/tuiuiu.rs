@@ -183,7 +183,10 @@ impl Tag {
     /// Get colors based on variant.
     fn get_colors(&self) -> (Color, Color) {
         if let Some(bg) = &self.bg_color {
-            let fg = self.fg_color.clone().unwrap_or(Color::Named(NamedColor::White));
+            let fg = self
+                .fg_color
+                .clone()
+                .unwrap_or(Color::Named(NamedColor::White));
             return (bg.clone(), fg);
         }
 
@@ -279,7 +282,10 @@ impl Tag {
             .collect();
         let content = content_parts.join("");
 
-        let display = format!("{}{}{}{}{}", bracket_char, padding, content, padding, close_bracket);
+        let display = format!(
+            "{}{}{}{}{}",
+            bracket_char, padding, content, padding, close_bracket
+        );
 
         VNode::Text(TextNode {
             content: display,
@@ -331,9 +337,7 @@ mod tests {
 
     #[test]
     fn test_tag_closable() {
-        let tag = Tag::new("Rust")
-            .closable(true)
-            .build();
+        let tag = Tag::new("Rust").closable(true).build();
         if let VNode::Text(node) = tag {
             assert!(node.content.contains("×"));
             assert!(node.content.contains("Rust"));
@@ -344,9 +348,7 @@ mod tests {
 
     #[test]
     fn test_tag_with_icon() {
-        let tag = Tag::new("Star")
-            .icon("⭐")
-            .build();
+        let tag = Tag::new("Star").icon("⭐").build();
         if let VNode::Text(node) = tag {
             assert!(node.content.contains("⭐"));
             assert!(node.content.contains("Star"));
@@ -379,10 +381,7 @@ mod tests {
 
     #[test]
     fn test_tag_custom_close_char() {
-        let tag = Tag::new("Remove")
-            .closable(true)
-            .close_char('✕')
-            .build();
+        let tag = Tag::new("Remove").closable(true).close_char('✕').build();
         if let VNode::Text(node) = tag {
             assert!(node.content.contains("✕"));
         } else {
@@ -392,9 +391,7 @@ mod tests {
 
     #[test]
     fn test_tag_square_brackets() {
-        let tag = Tag::new("Test")
-            .rounded(false)
-            .build();
+        let tag = Tag::new("Test").rounded(false).build();
         if let VNode::Text(node) = tag {
             assert!(node.content.starts_with('['));
             assert!(node.content.ends_with(']'));

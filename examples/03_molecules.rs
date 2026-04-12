@@ -2,25 +2,40 @@
 //!
 //! Demonstrates the molecule components in tuiuiu.
 
+use tuiuiu::core::component::VNode;
 use tuiuiu::molecules::{
-    // Select components
-    Select, SelectOption, MultiSelect, RadioGroup,
+    Align,
     // Autocomplete
-    Autocomplete, Suggestion,
-    // Table
-    Table, Column, Align,
-    // Tree
-    Tree, TreeNode,
+    Autocomplete,
+    BarChart,
+    BarItem,
     // Calendar
     Calendar,
-    // Tabs
-    Tabs, Tab, TabStyle,
     // Code
-    CodeBlock, CodeTheme, Markdown,
+    CodeBlock,
+    CodeTheme,
+    Column,
+    Gauge,
+    GaugeStyle,
+    Markdown,
+    MultiSelect,
+    RadioGroup,
+    // Select components
+    Select,
+    SelectOption,
     // Charts
-    Sparkline, BarChart, BarItem, Gauge, GaugeStyle,
+    Sparkline,
+    Suggestion,
+    Tab,
+    TabStyle,
+    // Table
+    Table,
+    // Tabs
+    Tabs,
+    // Tree
+    Tree,
+    TreeNode,
 };
-use tuiuiu::core::component::VNode;
 
 fn main() {
     // Test Select
@@ -52,7 +67,10 @@ fn main() {
         .open(true)
         .build();
 
-    println!("Autocomplete: {:?}\n", matches!(autocomplete, VNode::Box(_)));
+    println!(
+        "Autocomplete: {:?}\n",
+        matches!(autocomplete, VNode::Box(_))
+    );
 
     // Test Table
     let table = Table::new()
@@ -73,17 +91,12 @@ fn main() {
     // Test Tree
     let tree = Tree::new()
         .nodes([
-            TreeNode::folder("src")
-                .expanded(true)
-                .children([
-                    TreeNode::file("main.rs"),
-                    TreeNode::file("lib.rs"),
-                    TreeNode::folder("core")
-                        .children([
-                            TreeNode::file("app.rs"),
-                            TreeNode::file("signals.rs"),
-                        ]),
-                ]),
+            TreeNode::folder("src").expanded(true).children([
+                TreeNode::file("main.rs"),
+                TreeNode::file("lib.rs"),
+                TreeNode::folder("core")
+                    .children([TreeNode::file("app.rs"), TreeNode::file("signals.rs")]),
+            ]),
             TreeNode::file("Cargo.toml"),
         ])
         .build();
@@ -112,19 +125,22 @@ fn main() {
     println!("Tabs: {:?}\n", matches!(tabs, VNode::Box(_)));
 
     // Test CodeBlock
-    let code = CodeBlock::new(r#"
+    let code = CodeBlock::new(
+        r#"
 fn main() {
     println!("Hello, Tuiuiu!");
 }
-"#)
-        .rust()
-        .highlight([2])
-        .build();
+"#,
+    )
+    .rust()
+    .highlight([2])
+    .build();
 
     println!("CodeBlock: {:?}\n", matches!(code, VNode::Box(_)));
 
     // Test Markdown
-    let md = Markdown::new(r#"
+    let md = Markdown::new(
+        r#"
 # Title
 ## Subtitle
 
@@ -134,7 +150,9 @@ fn main() {
 > A quote
 
 `code`
-"#).build();
+"#,
+    )
+    .build();
 
     println!("Markdown: {:?}\n", matches!(md, VNode::Box(_)));
 

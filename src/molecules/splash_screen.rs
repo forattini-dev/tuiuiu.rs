@@ -2,8 +2,8 @@
 //!
 //! Full-screen splash/loading screen with logo and progress.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
-use crate::core::layout::{FlexDirection, JustifyContent, AlignItems};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
+use crate::core::layout::{AlignItems, FlexDirection, JustifyContent};
 
 /// Splash screen component.
 #[derive(Debug, Clone)]

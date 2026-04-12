@@ -2,7 +2,7 @@
 //!
 //! Renders text content with styling.
 
-use crate::core::component::{VNode, TextNode, TextStyle, Color, NamedColor, WrapMode};
+use crate::core::component::{Color, NamedColor, TextNode, TextStyle, VNode, WrapMode};
 
 /// Text component builder.
 #[derive(Debug, Clone, Default)]
@@ -209,10 +209,7 @@ mod tests {
 
     #[test]
     fn test_text_builder() {
-        let t = Text::new("Hello")
-            .bold()
-            .red()
-            .underline();
+        let t = Text::new("Hello").bold().red().underline();
 
         assert_eq!(t.content, "Hello");
         assert!(t.style.bold);

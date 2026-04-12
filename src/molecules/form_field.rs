@@ -506,9 +506,7 @@ mod tests {
 
     #[test]
     fn test_form_field_basic() {
-        let field = FormField::new("Username")
-            .input(text_input())
-            .build();
+        let field = FormField::new("Username").input(text_input()).build();
         matches!(field, VNode::Box(_));
     }
 

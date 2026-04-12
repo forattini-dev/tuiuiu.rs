@@ -2,7 +2,7 @@
 //!
 //! Tabbed interface for organizing content.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// A single tab.
@@ -153,14 +153,26 @@ impl Tabs {
 
             let (text, color, bold) = match self.style {
                 TabStyle::Underline => {
-                    let underline = if is_active { "─".repeat(label.len()) } else { String::new() };
+                    let underline = if is_active {
+                        "─".repeat(label.len())
+                    } else {
+                        String::new()
+                    };
                     let text = format!(" {} \n {}", label, underline);
-                    let color = if is_active { self.active_color } else { self.inactive_color };
+                    let color = if is_active {
+                        self.active_color
+                    } else {
+                        self.inactive_color
+                    };
                     (text, color, is_active)
                 }
                 TabStyle::Boxed => {
                     let text = format!("│ {} │", label);
-                    let color = if is_active { self.active_color } else { self.inactive_color };
+                    let color = if is_active {
+                        self.active_color
+                    } else {
+                        self.inactive_color
+                    };
                     (text, color, is_active)
                 }
                 TabStyle::Pills => {
@@ -169,12 +181,20 @@ impl Tabs {
                     } else {
                         format!(" {} ", label)
                     };
-                    let color = if is_active { self.active_color } else { self.inactive_color };
+                    let color = if is_active {
+                        self.active_color
+                    } else {
+                        self.inactive_color
+                    };
                     (text, color, false)
                 }
                 TabStyle::Minimal => {
                     let text = format!(" {} ", label);
-                    let color = if is_active { self.active_color } else { self.inactive_color };
+                    let color = if is_active {
+                        self.active_color
+                    } else {
+                        self.inactive_color
+                    };
                     (text, color, is_active)
                 }
             };
@@ -187,7 +207,12 @@ impl Tabs {
 
             tab_bar_children.push(VNode::styled_text(
                 text,
-                TextStyle { color: Some(text_color), bold, dim: tab.disabled, ..Default::default() }
+                TextStyle {
+                    color: Some(text_color),
+                    bold,
+                    dim: tab.disabled,
+                    ..Default::default()
+                },
             ));
         }
 
@@ -202,7 +227,9 @@ impl Tabs {
         });
 
         // Content area
-        let content = self.tabs.get(self.active)
+        let content = self
+            .tabs
+            .get(self.active)
             .and_then(|t| t.content.clone())
             .unwrap_or(VNode::Empty);
 

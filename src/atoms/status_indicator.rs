@@ -2,7 +2,7 @@
 //!
 //! Visual indicator for status states (online, offline, busy, away, etc).
 
-use crate::core::component::{VNode, TextStyle, Color, NamedColor};
+use crate::core::component::{Color, NamedColor, TextStyle, VNode};
 
 /// Status indicator states.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -226,7 +226,10 @@ impl StatusIndicator {
         };
 
         if self.show_label {
-            let label_text = self.label.as_deref().unwrap_or_else(|| self.get_default_label());
+            let label_text = self
+                .label
+                .as_deref()
+                .unwrap_or_else(|| self.get_default_label());
             let text = format!("{} {}", icon, label_text);
             VNode::styled_text(text, icon_style)
         } else {

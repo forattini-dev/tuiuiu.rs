@@ -2,7 +2,7 @@
 //!
 //! A button that requires confirmation before executing the action.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// Confirm button state.
@@ -189,9 +189,7 @@ impl ConfirmButton {
                 };
 
                 VNode::Box(BoxNode {
-                    children: vec![
-                        VNode::styled_text(format!(" {} ", self.label), style),
-                    ],
+                    children: vec![VNode::styled_text(format!(" {} ", self.label), style)],
                     style: BoxStyle {
                         border_style: Some(BorderStyle::Single),
                         padding_left: Some(1),
@@ -222,10 +220,7 @@ impl ConfirmButton {
 
                 VNode::Box(BoxNode {
                     children: vec![
-                        VNode::styled_text(
-                            format!(" {} ", self.confirm_label),
-                            confirm_style,
-                        ),
+                        VNode::styled_text(format!(" {} ", self.confirm_label), confirm_style),
                         VNode::styled_text(
                             format!(" │ {} {}", self.cancel_label, timeout_text),
                             cancel_style,
@@ -249,9 +244,7 @@ impl ConfirmButton {
                 };
 
                 VNode::Box(BoxNode {
-                    children: vec![
-                        VNode::styled_text(" ✓ Done ", style),
-                    ],
+                    children: vec![VNode::styled_text(" ✓ Done ", style)],
                     style: BoxStyle {
                         border_style: Some(BorderStyle::Single),
                         padding_left: Some(1),

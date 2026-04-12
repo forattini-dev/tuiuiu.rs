@@ -9,7 +9,7 @@
 //! - Milestone markers
 //! - Legend
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 // =============================================================================
@@ -194,33 +194,36 @@ impl GanttChart {
             TaskStatus::Blocked,
         ];
 
-        let items: Vec<VNode> = statuses.iter().map(|status| {
-            VNode::Box(BoxNode {
-                children: vec![
-                    VNode::styled_text(
-                        "■".to_string(),
-                        TextStyle {
-                            color: Some(status.color()),
-                            ..Default::default()
-                        },
-                    ),
-                    VNode::text(" ".to_string()),
-                    VNode::styled_text(
-                        status.label().to_string(),
-                        TextStyle {
-                            color: Some(Color::Named(NamedColor::Gray)),
-                            ..Default::default()
-                        },
-                    ),
-                    VNode::text("  ".to_string()),
-                ],
-                style: BoxStyle {
-                    flex_direction: Some(FlexDirection::Row),
+        let items: Vec<VNode> = statuses
+            .iter()
+            .map(|status| {
+                VNode::Box(BoxNode {
+                    children: vec![
+                        VNode::styled_text(
+                            "■".to_string(),
+                            TextStyle {
+                                color: Some(status.color()),
+                                ..Default::default()
+                            },
+                        ),
+                        VNode::text(" ".to_string()),
+                        VNode::styled_text(
+                            status.label().to_string(),
+                            TextStyle {
+                                color: Some(Color::Named(NamedColor::Gray)),
+                                ..Default::default()
+                            },
+                        ),
+                        VNode::text("  ".to_string()),
+                    ],
+                    style: BoxStyle {
+                        flex_direction: Some(FlexDirection::Row),
+                        ..Default::default()
+                    },
                     ..Default::default()
-                },
-                ..Default::default()
+                })
             })
-        }).collect();
+            .collect();
 
         VNode::Box(BoxNode {
             children: items,
@@ -268,7 +271,8 @@ impl GanttChart {
         // Task rows
         for task in &self.tasks {
             let duration = task.end_day - task.start_day;
-            let offset = ((task.start_day - min_day) as f64 / day_range as f64 * bar_width as f64) as usize;
+            let offset =
+                ((task.start_day - min_day) as f64 / day_range as f64 * bar_width as f64) as usize;
             let bar_len = ((duration as f64 / day_range as f64) * bar_width as f64).ceil() as usize;
             let bar_len = bar_len.max(1).min(bar_width - offset);
 

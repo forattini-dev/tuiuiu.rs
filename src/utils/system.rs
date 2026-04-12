@@ -12,7 +12,7 @@
 //! # Example
 //!
 //! ```rust,no_run
-//! use tuiuiu::utils::system::{get_cpu_usage, get_memory_info, get_system_info};
+//! use tuiuiu::utils::{format_bytes, system::{get_cpu_usage, get_memory_info, get_system_info}};
 //!
 //! let cpu = get_cpu_usage();
 //! println!("CPU: {}%", cpu.total);
@@ -45,7 +45,14 @@ pub struct CpuStats {
 impl CpuStats {
     /// Calculate total CPU time.
     pub fn total(&self) -> u64 {
-        self.user + self.nice + self.system + self.idle + self.iowait + self.irq + self.softirq + self.steal
+        self.user
+            + self.nice
+            + self.system
+            + self.idle
+            + self.iowait
+            + self.irq
+            + self.softirq
+            + self.steal
     }
 
     /// Calculate non-idle time.
@@ -218,7 +225,10 @@ pub fn get_cpu_usage() -> CpuUsage {
         .copied()
         .collect();
 
-    let curr_cores: Vec<CpuStats> = core_lines.iter().filter_map(|l| parse_cpu_line(l)).collect();
+    let curr_cores: Vec<CpuStats> = core_lines
+        .iter()
+        .filter_map(|l| parse_cpu_line(l))
+        .collect();
 
     {
         let mut prev_cores_guard = get_prev_core_stats().lock().unwrap();
@@ -371,7 +381,11 @@ pub fn get_system_info() -> SystemInfo {
 
     let uptime = fs::read_to_string("/proc/uptime")
         .ok()
-        .and_then(|s| s.split_whitespace().next().and_then(|v| v.parse::<f64>().ok()))
+        .and_then(|s| {
+            s.split_whitespace()
+                .next()
+                .and_then(|v| v.parse::<f64>().ok())
+        })
         .map(|v| v as u64)
         .unwrap_or(0);
 
@@ -512,10 +526,10 @@ mod tests {
     fn test_format_bytes() {
         assert_eq!(format_bytes(0), "0B");
         assert_eq!(format_bytes(512), "512B");
-        assert_eq!(format_bytes(1024), "1K");  // No decimal for round numbers
+        assert_eq!(format_bytes(1024), "1K"); // No decimal for round numbers
         assert_eq!(format_bytes(1536), "1.5K");
-        assert_eq!(format_bytes(1048576), "1M");  // No decimal for round numbers
-        assert_eq!(format_bytes(1073741824), "1G");  // No decimal for round numbers
+        assert_eq!(format_bytes(1048576), "1M"); // No decimal for round numbers
+        assert_eq!(format_bytes(1073741824), "1G"); // No decimal for round numbers
     }
 
     #[test]

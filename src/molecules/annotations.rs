@@ -296,14 +296,11 @@ impl Annotation {
 /// Format annotation label.
 pub fn format_annotation_label(annotation: &Annotation) -> String {
     match annotation {
-        Annotation::Threshold(a) => {
-            a.label.clone().unwrap_or_else(|| format!("{}", a.value))
-        }
-        Annotation::Range(a) => {
-            a.label
-                .clone()
-                .unwrap_or_else(|| format!("{} - {}", a.start, a.end))
-        }
+        Annotation::Threshold(a) => a.label.clone().unwrap_or_else(|| format!("{}", a.value)),
+        Annotation::Range(a) => a
+            .label
+            .clone()
+            .unwrap_or_else(|| format!("{} - {}", a.start, a.end)),
         Annotation::Text(a) => a.text.clone(),
         Annotation::Point(a) => a.label.clone().unwrap_or_else(|| "●".to_string()),
     }
@@ -372,9 +369,7 @@ mod tests {
 
     #[test]
     fn test_threshold_annotation() {
-        let ann = ThresholdAnnotation::new(50.0)
-            .label("Midpoint")
-            .dashed();
+        let ann = ThresholdAnnotation::new(50.0).label("Midpoint").dashed();
 
         assert_eq!(ann.value, 50.0);
         assert_eq!(ann.label, Some("Midpoint".to_string()));
@@ -406,9 +401,7 @@ mod tests {
         let ann = Annotation::Threshold(ThresholdAnnotation::new(100.0));
         assert_eq!(format_annotation_label(&ann), "100");
 
-        let ann_with_label = Annotation::Range(
-            RangeAnnotation::new(0.0, 50.0).label("Low"),
-        );
+        let ann_with_label = Annotation::Range(RangeAnnotation::new(0.0, 50.0).label("Low"));
         assert_eq!(format_annotation_label(&ann_with_label), "Low");
     }
 }

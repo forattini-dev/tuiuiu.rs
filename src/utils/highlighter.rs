@@ -255,21 +255,29 @@ impl LanguageDefinition {
         Self {
             name: "rust".to_string(),
             keywords: vec![
-                "as", "async", "await", "break", "const", "continue", "crate", "dyn",
-                "else", "enum", "extern", "false", "fn", "for", "if", "impl", "in",
-                "let", "loop", "match", "mod", "move", "mut", "pub", "ref", "return",
-                "self", "Self", "static", "struct", "super", "trait", "true", "type",
-                "unsafe", "use", "where", "while",
+                "as", "async", "await", "break", "const", "continue", "crate", "dyn", "else",
+                "enum", "extern", "false", "fn", "for", "if", "impl", "in", "let", "loop", "match",
+                "mod", "move", "mut", "pub", "ref", "return", "self", "Self", "static", "struct",
+                "super", "trait", "true", "type", "unsafe", "use", "where", "while",
             ],
             types: vec![
-                "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128",
-                "isize", "str", "u8", "u16", "u32", "u64", "u128", "usize",
-                "String", "Vec", "Option", "Result", "Box", "Rc", "Arc", "Cell",
-                "RefCell", "HashMap", "HashSet", "BTreeMap", "BTreeSet",
+                "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "str",
+                "u8", "u16", "u32", "u64", "u128", "usize", "String", "Vec", "Option", "Result",
+                "Box", "Rc", "Arc", "Cell", "RefCell", "HashMap", "HashSet", "BTreeMap",
+                "BTreeSet",
             ],
             builtins: vec![
-                "println", "print", "eprintln", "eprint", "format", "panic", "assert",
-                "debug_assert", "todo", "unimplemented", "unreachable",
+                "println",
+                "print",
+                "eprintln",
+                "eprint",
+                "format",
+                "panic",
+                "assert",
+                "debug_assert",
+                "todo",
+                "unimplemented",
+                "unreachable",
             ],
             constants: vec!["None", "Some", "Ok", "Err", "true", "false"],
             line_comment: Some("//"),
@@ -288,20 +296,79 @@ impl LanguageDefinition {
         Self {
             name: "javascript".to_string(),
             keywords: vec![
-                "async", "await", "break", "case", "catch", "class", "const",
-                "continue", "debugger", "default", "delete", "do", "else", "export",
-                "extends", "finally", "for", "function", "if", "import", "in",
-                "instanceof", "let", "new", "return", "static", "super", "switch",
-                "this", "throw", "try", "typeof", "var", "void", "while", "with", "yield",
+                "async",
+                "await",
+                "break",
+                "case",
+                "catch",
+                "class",
+                "const",
+                "continue",
+                "debugger",
+                "default",
+                "delete",
+                "do",
+                "else",
+                "export",
+                "extends",
+                "finally",
+                "for",
+                "function",
+                "if",
+                "import",
+                "in",
+                "instanceof",
+                "let",
+                "new",
+                "return",
+                "static",
+                "super",
+                "switch",
+                "this",
+                "throw",
+                "try",
+                "typeof",
+                "var",
+                "void",
+                "while",
+                "with",
+                "yield",
             ],
             types: vec![
-                "string", "number", "boolean", "object", "symbol", "bigint", "undefined",
-                "null", "any", "unknown", "never", "void", "Array", "Promise", "Map", "Set",
+                "string",
+                "number",
+                "boolean",
+                "object",
+                "symbol",
+                "bigint",
+                "undefined",
+                "null",
+                "any",
+                "unknown",
+                "never",
+                "void",
+                "Array",
+                "Promise",
+                "Map",
+                "Set",
             ],
             builtins: vec![
-                "console", "Math", "JSON", "Object", "Array", "String", "Number",
-                "Boolean", "Date", "RegExp", "Error", "Promise", "setTimeout",
-                "setInterval", "fetch", "require",
+                "console",
+                "Math",
+                "JSON",
+                "Object",
+                "Array",
+                "String",
+                "Number",
+                "Boolean",
+                "Date",
+                "RegExp",
+                "Error",
+                "Promise",
+                "setTimeout",
+                "setInterval",
+                "fetch",
+                "require",
             ],
             constants: vec!["true", "false", "null", "undefined", "NaN", "Infinity"],
             line_comment: Some("//"),
@@ -320,19 +387,52 @@ impl LanguageDefinition {
         Self {
             name: "python".to_string(),
             keywords: vec![
-                "and", "as", "assert", "async", "await", "break", "class", "continue",
-                "def", "del", "elif", "else", "except", "finally", "for", "from",
-                "global", "if", "import", "in", "is", "lambda", "nonlocal", "not",
-                "or", "pass", "raise", "return", "try", "while", "with", "yield",
+                "and", "as", "assert", "async", "await", "break", "class", "continue", "def",
+                "del", "elif", "else", "except", "finally", "for", "from", "global", "if",
+                "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return",
+                "try", "while", "with", "yield",
             ],
             types: vec![
-                "int", "float", "str", "bool", "list", "dict", "tuple", "set",
-                "bytes", "bytearray", "complex", "frozenset", "range", "slice",
+                "int",
+                "float",
+                "str",
+                "bool",
+                "list",
+                "dict",
+                "tuple",
+                "set",
+                "bytes",
+                "bytearray",
+                "complex",
+                "frozenset",
+                "range",
+                "slice",
             ],
             builtins: vec![
-                "print", "len", "range", "type", "isinstance", "input", "open",
-                "sum", "min", "max", "abs", "round", "sorted", "reversed", "enumerate",
-                "zip", "map", "filter", "any", "all", "dir", "help", "id", "hash",
+                "print",
+                "len",
+                "range",
+                "type",
+                "isinstance",
+                "input",
+                "open",
+                "sum",
+                "min",
+                "max",
+                "abs",
+                "round",
+                "sorted",
+                "reversed",
+                "enumerate",
+                "zip",
+                "map",
+                "filter",
+                "any",
+                "all",
+                "dir",
+                "help",
+                "id",
+                "hash",
             ],
             constants: vec!["True", "False", "None"],
             line_comment: Some("#"),
@@ -351,19 +451,57 @@ impl LanguageDefinition {
         Self {
             name: "go".to_string(),
             keywords: vec![
-                "break", "case", "chan", "const", "continue", "default", "defer",
-                "else", "fallthrough", "for", "func", "go", "goto", "if", "import",
-                "interface", "map", "package", "range", "return", "select", "struct",
-                "switch", "type", "var",
+                "break",
+                "case",
+                "chan",
+                "const",
+                "continue",
+                "default",
+                "defer",
+                "else",
+                "fallthrough",
+                "for",
+                "func",
+                "go",
+                "goto",
+                "if",
+                "import",
+                "interface",
+                "map",
+                "package",
+                "range",
+                "return",
+                "select",
+                "struct",
+                "switch",
+                "type",
+                "var",
             ],
             types: vec![
-                "bool", "byte", "complex64", "complex128", "error", "float32", "float64",
-                "int", "int8", "int16", "int32", "int64", "rune", "string",
-                "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+                "bool",
+                "byte",
+                "complex64",
+                "complex128",
+                "error",
+                "float32",
+                "float64",
+                "int",
+                "int8",
+                "int16",
+                "int32",
+                "int64",
+                "rune",
+                "string",
+                "uint",
+                "uint8",
+                "uint16",
+                "uint32",
+                "uint64",
+                "uintptr",
             ],
             builtins: vec![
-                "append", "cap", "close", "complex", "copy", "delete", "imag", "len",
-                "make", "new", "panic", "print", "println", "real", "recover",
+                "append", "cap", "close", "complex", "copy", "delete", "imag", "len", "make",
+                "new", "panic", "print", "println", "real", "recover",
             ],
             constants: vec!["true", "false", "nil", "iota"],
             line_comment: Some("//"),
@@ -401,15 +539,15 @@ impl LanguageDefinition {
         Self {
             name: "bash".to_string(),
             keywords: vec![
-                "if", "then", "else", "elif", "fi", "case", "esac", "for", "while",
-                "do", "done", "in", "function", "select", "until", "return", "exit",
-                "break", "continue", "local", "export", "readonly", "declare",
+                "if", "then", "else", "elif", "fi", "case", "esac", "for", "while", "do", "done",
+                "in", "function", "select", "until", "return", "exit", "break", "continue",
+                "local", "export", "readonly", "declare",
             ],
             types: vec![],
             builtins: vec![
-                "echo", "printf", "read", "cd", "pwd", "ls", "cat", "grep", "sed",
-                "awk", "cut", "sort", "uniq", "wc", "head", "tail", "find", "xargs",
-                "test", "source", "alias", "set", "unset", "shift", "eval", "exec",
+                "echo", "printf", "read", "cd", "pwd", "ls", "cat", "grep", "sed", "awk", "cut",
+                "sort", "uniq", "wc", "head", "tail", "find", "xargs", "test", "source", "alias",
+                "set", "unset", "shift", "eval", "exec",
             ],
             constants: vec!["true", "false"],
             line_comment: Some("#"),
@@ -582,7 +720,11 @@ impl Highlighter {
             // Check for numbers
             if chars[pos].is_ascii_digit() {
                 let start = pos;
-                while pos < chars.len() && (chars[pos].is_ascii_alphanumeric() || chars[pos] == '.' || chars[pos] == '_') {
+                while pos < chars.len()
+                    && (chars[pos].is_ascii_alphanumeric()
+                        || chars[pos] == '.'
+                        || chars[pos] == '_')
+                {
                     pos += 1;
                 }
                 tokens.push(Token::new(
@@ -624,7 +766,12 @@ impl Highlighter {
                     TokenType::Constant
                 } else if lang.builtins.contains(&word.as_str()) {
                     TokenType::Function
-                } else if word.chars().next().map(|c| c.is_uppercase()).unwrap_or(false) {
+                } else if word
+                    .chars()
+                    .next()
+                    .map(|c| c.is_uppercase())
+                    .unwrap_or(false)
+                {
                     TokenType::Type
                 } else if pos < chars.len() && chars[pos] == '(' {
                     TokenType::Function
@@ -655,7 +802,9 @@ impl Highlighter {
                             pos += 1;
                         }
                     } else {
-                        while pos < chars.len() && (chars[pos].is_alphanumeric() || chars[pos] == '_') {
+                        while pos < chars.len()
+                            && (chars[pos].is_alphanumeric() || chars[pos] == '_')
+                        {
                             pos += 1;
                         }
                     }
@@ -680,10 +829,21 @@ impl Highlighter {
                     // Multi-char operators
                     if pos < chars.len() {
                         match (ch, chars[pos]) {
-                            ('=', '=') | ('!', '=') | ('<', '=') | ('>', '=') |
-                            ('+', '=') | ('-', '=') | ('*', '=') | ('/', '=') |
-                            ('&', '&') | ('|', '|') | ('-', '>') | ('=', '>') |
-                            ('<', '<') | ('>', '>') | (':', ':') => {
+                            ('=', '=')
+                            | ('!', '=')
+                            | ('<', '=')
+                            | ('>', '=')
+                            | ('+', '=')
+                            | ('-', '=')
+                            | ('*', '=')
+                            | ('/', '=')
+                            | ('&', '&')
+                            | ('|', '|')
+                            | ('-', '>')
+                            | ('=', '>')
+                            | ('<', '<')
+                            | ('>', '>')
+                            | (':', ':') => {
                                 pos += 1;
                             }
                             _ => {}
@@ -710,22 +870,21 @@ impl Highlighter {
 
     /// Highlight code and return tokens.
     pub fn highlight(&self, code: &str, language: &str) -> Vec<Vec<Token>> {
-        let lang = LanguageDefinition::by_name(language)
-            .unwrap_or_else(|| LanguageDefinition {
-                name: language.to_string(),
-                keywords: vec![],
-                types: vec![],
-                builtins: vec![],
-                constants: vec![],
-                line_comment: Some("//"),
-                block_comment: None,
-                string_delimiters: vec!['"', '\''],
-                char_delimiter: None,
-                raw_string_prefix: None,
-                attribute_prefix: None,
-                macro_suffix: None,
-                has_lifetimes: false,
-            });
+        let lang = LanguageDefinition::by_name(language).unwrap_or_else(|| LanguageDefinition {
+            name: language.to_string(),
+            keywords: vec![],
+            types: vec![],
+            builtins: vec![],
+            constants: vec![],
+            line_comment: Some("//"),
+            block_comment: None,
+            string_delimiters: vec!['"', '\''],
+            char_delimiter: None,
+            raw_string_prefix: None,
+            attribute_prefix: None,
+            macro_suffix: None,
+            has_lifetimes: false,
+        });
 
         code.lines()
             .map(|line| self.highlight_line(line, &lang))

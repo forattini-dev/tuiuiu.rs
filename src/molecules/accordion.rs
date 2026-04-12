@@ -11,7 +11,9 @@
 //! ▶ Section 3
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection};
 
 // =============================================================================

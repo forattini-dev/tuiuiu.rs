@@ -290,7 +290,10 @@ impl Timer {
             TimerFormat::MinutesSeconds => {
                 if self.show_hours || hours > 0 {
                     if self.show_millis {
-                        format!("{:02}{}{:02}{}{:02}.{:02}", hours, sep, minutes, sep, seconds, millis)
+                        format!(
+                            "{:02}{}{:02}{}{:02}.{:02}",
+                            hours, sep, minutes, sep, seconds, millis
+                        )
                     } else {
                         format!("{:02}{}{:02}{}{:02}", hours, sep, minutes, sep, seconds)
                     }
@@ -302,7 +305,10 @@ impl Timer {
             }
             TimerFormat::HoursMinutesSeconds => {
                 if self.show_millis {
-                    format!("{:02}{}{:02}{}{:02}.{:02}", hours, sep, minutes, sep, seconds, millis)
+                    format!(
+                        "{:02}{}{:02}{}{:02}.{:02}",
+                        hours, sep, minutes, sep, seconds, millis
+                    )
                 } else {
                     format!("{:02}{}{:02}{}{:02}", hours, sep, minutes, sep, seconds)
                 }
@@ -371,27 +377,25 @@ impl Timer {
         });
 
         match self.label {
-            Some(label) => {
-                VNode::Box(BoxNode {
-                    id: None,
-                    style: BoxStyle {
-                        flex_direction: Some(FlexDirection::Row),
-                        gap: Some(1),
-                        ..Default::default()
-                    },
-                    children: vec![
-                        VNode::Text(TextNode {
-                            content: format!("{}: ", label),
-                            style: TextStyle {
-                                color: Some(Color::Named(NamedColor::Gray)),
-                                ..Default::default()
-                            },
-                        }),
-                        time_node,
-                    ],
-                    handlers: Default::default(),
-                })
-            }
+            Some(label) => VNode::Box(BoxNode {
+                id: None,
+                style: BoxStyle {
+                    flex_direction: Some(FlexDirection::Row),
+                    gap: Some(1),
+                    ..Default::default()
+                },
+                children: vec![
+                    VNode::Text(TextNode {
+                        content: format!("{}: ", label),
+                        style: TextStyle {
+                            color: Some(Color::Named(NamedColor::Gray)),
+                            ..Default::default()
+                        },
+                    }),
+                    time_node,
+                ],
+                handlers: Default::default(),
+            }),
             None => time_node,
         }
     }
@@ -404,7 +408,10 @@ impl From<Timer> for VNode {
 }
 
 /// Create a reactive timer state with signals.
-pub fn create_timer_state(_mode: TimerMode, duration_ms: Option<u64>) -> (
+pub fn create_timer_state(
+    _mode: TimerMode,
+    duration_ms: Option<u64>,
+) -> (
     crate::core::signals::ReadSignal<TimerState>,
     crate::core::signals::WriteSignal<TimerState>,
 ) {
@@ -471,9 +478,7 @@ mod tests {
 
     #[test]
     fn test_timer_human_format() {
-        let timer = Timer::countdown(125)
-            .format(TimerFormat::Human)
-            .build();
+        let timer = Timer::countdown(125).format(TimerFormat::Human).build();
         if let VNode::Text(node) = timer {
             assert_eq!(node.content, "2 min 5 sec");
         } else {
@@ -483,9 +488,7 @@ mod tests {
 
     #[test]
     fn test_timer_with_label() {
-        let timer = Timer::countdown(60)
-            .label("Time left")
-            .build();
+        let timer = Timer::countdown(60).label("Time left").build();
         matches!(timer, VNode::Box(_));
     }
 
@@ -503,9 +506,7 @@ mod tests {
 
     #[test]
     fn test_timer_separator() {
-        let timer = Timer::countdown(90)
-            .separator('.')
-            .build();
+        let timer = Timer::countdown(90).separator('.').build();
         if let VNode::Text(node) = timer {
             assert_eq!(node.content, "01.30");
         } else {

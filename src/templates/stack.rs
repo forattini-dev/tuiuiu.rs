@@ -10,7 +10,7 @@
 //! # Example
 //!
 //! ```rust
-//! use tuiuiu::templates::{VStack, HStack, Center, Spacer};
+//! use tuiuiu::templates::{HAlign, HJustify, VStack, VAlign, HStack, Center, Spacer};
 //!
 //! // Vertical stack with gap
 //! let vstack = VStack::new()
@@ -25,7 +25,7 @@
 //! let centered = Center::new().width(80).height(24);
 //! ```
 
-use crate::core::layout::{FlexDirection, JustifyContent, AlignItems};
+use crate::core::layout::{AlignItems, FlexDirection, JustifyContent};
 use crate::utils::border::BorderStyle;
 
 // =============================================================================
@@ -546,10 +546,7 @@ mod tests {
 
     #[test]
     fn test_vstack() {
-        let vstack = VStack::new()
-            .gap(1)
-            .align(VAlign::Center)
-            .padding(2);
+        let vstack = VStack::new().gap(1).align(VAlign::Center).padding(2);
 
         let props = vstack.layout_props();
         assert_eq!(props.direction, FlexDirection::Column);
@@ -560,9 +557,7 @@ mod tests {
 
     #[test]
     fn test_hstack() {
-        let hstack = HStack::new()
-            .gap(2)
-            .justify(HJustify::SpaceBetween);
+        let hstack = HStack::new().gap(2).justify(HJustify::SpaceBetween);
 
         let props = hstack.layout_props();
         assert_eq!(props.direction, FlexDirection::Row);
@@ -571,9 +566,7 @@ mod tests {
 
     #[test]
     fn test_center() {
-        let center = Center::new()
-            .width(80)
-            .height(24);
+        let center = Center::new().width(80).height(24);
 
         let props = center.layout_props();
         assert_eq!(props.align_items, AlignItems::Center);

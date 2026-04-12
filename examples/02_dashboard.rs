@@ -12,7 +12,6 @@ fn main() -> std::io::Result<()> {
         .border_round()
         .children([
             Text::new("📊 Dashboard").cyan().bold().build(),
-            
             Box::new()
                 .row()
                 .gap(2)
@@ -26,7 +25,6 @@ fn main() -> std::io::Result<()> {
                             Text::new("45%").green().build(),
                         ])
                         .build(),
-                    
                     Box::new()
                         .column()
                         .padding(1)
@@ -38,7 +36,6 @@ fn main() -> std::io::Result<()> {
                         .build(),
                 ])
                 .build(),
-            
             Text::new("Press q to quit").gray().dim().build(),
         ]);
 

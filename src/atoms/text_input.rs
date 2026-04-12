@@ -1,6 +1,6 @@
 //! Text Input Component
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextNode, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, TextNode, VNode};
 
 /// Text input component.
 #[derive(Debug, Clone, Default)]
@@ -11,7 +11,9 @@ pub struct TextInput {
 }
 
 impl TextInput {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn value(mut self, value: impl Into<String>) -> Self {
         self.value = value.into();
@@ -51,5 +53,7 @@ impl TextInput {
 }
 
 impl From<TextInput> for VNode {
-    fn from(t: TextInput) -> VNode { t.build() }
+    fn from(t: TextInput) -> VNode {
+        t.build()
+    }
 }

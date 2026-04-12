@@ -4,8 +4,8 @@
 //!
 //! For FPS tracking, see the dedicated `fps` module.
 
-use crate::core::terminal::get_terminal_size;
 use crate::core::signals::{create_signal, ReadSignal};
+use crate::core::terminal::get_terminal_size;
 
 /// Get terminal size as reactive signals.
 ///

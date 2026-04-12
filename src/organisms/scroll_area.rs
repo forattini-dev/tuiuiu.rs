@@ -23,33 +23,83 @@ pub enum ScrollbarVisibility {
     Hover,
 }
 
-/// ScrollArea component.
+/// Height option for scroll areas.
+#[derive(Debug, Clone, Copy)]
+pub enum ScrollAreaHeight {
+    /// Auto height
+    Auto,
+    /// Fill available space
+    Fill,
+    /// Fixed height
+    Fixed(u16),
+}
+
+/// Configuration for creating/connecting a ScrollArea state.
+pub struct ScrollAreaOptions {
+    pub height: Option<ScrollAreaHeight>,
+    pub min_height: Option<u16>,
+    pub max_height: Option<u16>,
+    pub flex_grow: Option<usize>,
+    pub content: Vec<VNode>,
+    pub initial_scroll_top: Option<usize>,
+    pub auto_scroll: bool,
+    pub show_scrollbar: bool,
+    pub scrollbar_color: Option<Color>,
+    pub track_color: Option<Color>,
+    pub wrap_width: Option<usize>,
+    pub scroll_step: Option<usize>,
+    pub page_size: Option<usize>,
+    pub on_scroll: Option<Box<dyn Fn(usize) + Send + Sync>>,
+    pub is_active: Option<bool>,
+    pub width: Option<u16>,
+    pub state: Option<ScrollAreaState>,
+    pub id: Option<String>,
+    pub auto_scroll_threshold: Option<usize>,
+    pub autofocus: Option<bool>,
+}
+
+impl Default for ScrollAreaOptions {
+    fn default() -> Self {
+        Self {
+            height: Some(ScrollAreaHeight::Auto),
+            min_height: None,
+            max_height: None,
+            flex_grow: None,
+            content: Vec::new(),
+            initial_scroll_top: Some(0),
+            auto_scroll: false,
+            show_scrollbar: true,
+            scrollbar_color: None,
+            track_color: None,
+            wrap_width: None,
+            scroll_step: Some(1),
+            page_size: None,
+            on_scroll: None,
+            is_active: Some(true),
+            width: None,
+            state: None,
+            id: None,
+            auto_scroll_threshold: None,
+            autofocus: None,
+        }
+    }
+}
+
+pub type ScrollAreaProps = ScrollAreaOptions;
+
+/// ScrollArea Component
 ///
 /// A container that allows scrolling through content that exceeds
 /// the visible area.
-///
-/// # Example
-/// ```ignore
-/// let scroll_area = ScrollArea::new()
-///     .height(10)
-///     .content(vec![
-///         VNode::text("Line 1"),
-///         VNode::text("Line 2"),
-///         // ... many more lines
-///     ])
-///     .build();
-/// ```
 #[derive(Debug, Clone, Default)]
 pub struct ScrollArea {
     /// Content to scroll
     content: Vec<VNode>,
     /// Visible height (in lines)
     height: u16,
-    /// Visible width (in characters)
-    width: Option<u16>,
-    /// Current scroll offset (line)
+    /// Current scroll offset
     scroll_offset: usize,
-    /// Total content height (lines) - for calculating scrollbar
+    /// Total content height (lines)
     content_height: usize,
     /// Show vertical scrollbar
     show_scrollbar: ScrollbarVisibility,
@@ -67,10 +117,9 @@ impl ScrollArea {
         Self {
             content: Vec::new(),
             height: 10,
-            width: None,
             scroll_offset: 0,
             content_height: 0,
-            show_scrollbar: ScrollbarVisibility::default(),
+            show_scrollbar: ScrollbarVisibility::Auto,
             unicode: true,
             scrollbar_color: None,
             track_color: None,
@@ -98,8 +147,7 @@ impl ScrollArea {
     }
 
     /// Set the visible width.
-    pub fn width(mut self, width: u16) -> Self {
-        self.width = Some(width);
+    pub fn width(self, _width: u16) -> Self {
         self
     }
 
@@ -109,43 +157,21 @@ impl ScrollArea {
         self
     }
 
-    /// Set the total content height (for external control).
-    pub fn content_height(mut self, height: usize) -> Self {
-        self.content_height = height;
-        self
-    }
-
-    /// Set scrollbar visibility.
+    /// Set scrollbar visibility mode.
     pub fn scrollbar(mut self, visibility: ScrollbarVisibility) -> Self {
         self.show_scrollbar = visibility;
         self
     }
 
-    /// Always show scrollbar.
-    pub fn scrollbar_always(self) -> Self {
-        self.scrollbar(ScrollbarVisibility::Always)
-    }
-
-    /// Hide scrollbar.
-    pub fn scrollbar_never(self) -> Self {
-        self.scrollbar(ScrollbarVisibility::Never)
-    }
-
-    /// Use ASCII characters for scrollbar.
-    pub fn ascii(mut self, ascii: bool) -> Self {
-        self.unicode = !ascii;
-        self
-    }
-
     /// Set scrollbar color.
-    pub fn scrollbar_color(mut self, color: Color) -> Self {
-        self.scrollbar_color = Some(color);
+    pub fn scrollbar_color(mut self, color: Option<Color>) -> Self {
+        self.scrollbar_color = color;
         self
     }
 
-    /// Set track color.
-    pub fn track_color(mut self, color: Color) -> Self {
-        self.track_color = Some(color);
+    /// Set scrollbar track color.
+    pub fn track_color(mut self, color: Option<Color>) -> Self {
+        self.track_color = color;
         self
     }
 
@@ -160,7 +186,6 @@ impl ScrollArea {
             }
         };
 
-        // Clamp scroll offset
         let max_offset = if self.content_height > visible_height {
             self.content_height - visible_height
         } else {
@@ -168,15 +193,12 @@ impl ScrollArea {
         };
         let scroll_offset = self.scroll_offset.min(max_offset);
 
-        // Save values before consuming content
         let height = self.height;
-        let width = self.width;
         let content_height = self.content_height;
         let unicode = self.unicode;
         let scrollbar_color = self.scrollbar_color;
         let track_color = self.track_color;
 
-        // Get visible content
         let visible_content: Vec<VNode> = self
             .content
             .into_iter()
@@ -184,14 +206,12 @@ impl ScrollArea {
             .take(visible_height)
             .collect();
 
-        // Content column
         let content_box = VNode::Box(BoxNode {
             id: None,
             style: BoxStyle {
                 flex_direction: Some(FlexDirection::Column),
                 flex_grow: Some(1.0),
                 height: Some(Size::Fixed(height)),
-                width: width.map(Size::Fixed),
                 ..Default::default()
             },
             children: visible_content,
@@ -205,7 +225,6 @@ impl ScrollArea {
             return content_box;
         }
 
-        // Build scrollbar
         let scrollbar = Self::build_scrollbar_static(
             visible_height,
             content_height,
@@ -215,21 +234,19 @@ impl ScrollArea {
             track_color,
         );
 
-        // Row with content and scrollbar
         VNode::Box(BoxNode {
             id: None,
             style: BoxStyle {
                 flex_direction: Some(FlexDirection::Row),
                 height: Some(Size::Fixed(height)),
-                width: width.map(|w| Size::Fixed(w + 1)), // +1 for scrollbar
                 ..Default::default()
             },
             children: vec![content_box, scrollbar],
-            handlers: Default::default(),
+            ..Default::default()
         })
     }
 
-    /// Build the scrollbar (static version for ownership-safe use).
+    /// Build scrollbar char nodes.
     fn build_scrollbar_static(
         visible_height: usize,
         total_height: usize,
@@ -241,13 +258,8 @@ impl ScrollArea {
         let scrollbar_color = scrollbar_color_opt.unwrap_or(Color::Named(NamedColor::White));
         let track_color = track_color_opt.unwrap_or(Color::Named(NamedColor::BrightBlack));
 
-        let (thumb_char, track_char) = if unicode {
-            ('█', '│')
-        } else {
-            ('#', '|')
-        };
+        let (thumb_char, track_char) = if unicode { ('█', '│') } else { ('#', '|') };
 
-        // Calculate thumb size and position
         let thumb_size = if total_height > 0 {
             ((visible_height * visible_height) / total_height).max(1)
         } else {
@@ -260,7 +272,6 @@ impl ScrollArea {
             0
         };
 
-        // Build scrollbar lines
         let mut lines = Vec::new();
         for i in 0..visible_height {
             let is_thumb = i >= thumb_position && i < thumb_position + thumb_size;
@@ -303,16 +314,11 @@ impl From<ScrollArea> for VNode {
 // =============================================================================
 
 /// State manager for ScrollArea.
-///
-/// Provides reactive scroll position with methods for navigation.
 pub struct ScrollAreaState {
-    /// Current scroll offset
     offset_read: ReadSignal<usize>,
     offset_write: WriteSignal<usize>,
-    /// Visible height
     visible_height_read: ReadSignal<usize>,
     visible_height_write: WriteSignal<usize>,
-    /// Total content height
     total_height_read: ReadSignal<usize>,
     total_height_write: WriteSignal<usize>,
 }
@@ -344,17 +350,16 @@ impl ScrollAreaState {
         self.offset_write.set(offset.min(max));
     }
 
-    /// Set the total content height.
+    /// Set total content height.
     pub fn set_total_height(&self, height: usize) {
         self.total_height_write.set(height);
-        // Clamp offset if needed
         let max = self.max_offset();
         if self.offset_read.get() > max {
             self.offset_write.set(max);
         }
     }
 
-    /// Set the visible height.
+    /// Set visible height.
     pub fn set_visible_height(&self, height: usize) {
         self.visible_height_write.set(height);
     }
@@ -387,14 +392,14 @@ impl ScrollAreaState {
         }
     }
 
-    /// Scroll up by a page.
+    /// Scroll up by one page.
     pub fn page_up(&self) {
         let current = self.offset_read.get();
         let page_size = self.visible_height_read.get();
         self.offset_write.set(current.saturating_sub(page_size));
     }
 
-    /// Scroll down by a page.
+    /// Scroll down by one page.
     pub fn page_down(&self) {
         let current = self.offset_read.get();
         let page_size = self.visible_height_read.get();
@@ -412,7 +417,7 @@ impl ScrollAreaState {
         self.offset_write.set(self.max_offset());
     }
 
-    /// Scroll to a specific line.
+    /// Scroll to specific line.
     pub fn scroll_to(&self, line: usize) {
         let max = self.max_offset();
         self.offset_write.set(line.min(max));
@@ -433,7 +438,7 @@ impl ScrollAreaState {
         self.offset_read.get() < self.max_offset()
     }
 
-    /// Get scroll percentage (0.0 - 1.0).
+    /// Get scroll percentage (0..1).
     pub fn scroll_percentage(&self) -> f64 {
         let max = self.max_offset();
         if max == 0 {
@@ -450,6 +455,109 @@ impl Default for ScrollAreaState {
     }
 }
 
+/// Create and initialize a ScrollArea state from JS-style options.
+pub fn create_scroll_area(options: ScrollAreaOptions) -> ScrollAreaState {
+    let mut target_height = 10usize;
+    if let Some(height) = options.height {
+        target_height = match height {
+            ScrollAreaHeight::Fixed(v) => v as usize,
+            ScrollAreaHeight::Auto | ScrollAreaHeight::Fill => 10,
+        }
+    }
+
+    let state = ScrollAreaState::new(target_height);
+    state.set_total_height(options.content.len());
+    if let Some(top) = options.initial_scroll_top {
+        state.set_offset(top);
+    }
+    if let Some(visible) = options.min_height {
+        state.set_visible_height(visible as usize);
+    }
+    state
+}
+
+/// Alias for snake/camel export style.
+pub fn createScrollArea(options: ScrollAreaOptions) -> ScrollAreaState {
+    create_scroll_area(options)
+}
+
+#[derive(Debug, Clone)]
+pub struct ScrollableTextProps {
+    pub text: String,
+    pub height: u16,
+    pub width: Option<u16>,
+    pub show_scrollbar: bool,
+    pub auto_scroll: bool,
+}
+
+impl Default for ScrollableTextProps {
+    fn default() -> Self {
+        Self {
+            text: String::new(),
+            height: 10,
+            width: None,
+            show_scrollbar: true,
+            auto_scroll: false,
+        }
+    }
+}
+
+pub fn ScrollableText(props: ScrollableTextProps) -> VNode {
+    let lines: Vec<VNode> = props
+        .text
+        .lines()
+        .map(|line| VNode::text(line.to_string()))
+        .collect();
+
+    ScrollArea::new()
+        .content(lines)
+        .height(props.height)
+        .build()
+}
+
+pub fn createScrollableText(props: ScrollableTextProps) -> VNode {
+    ScrollableText(props)
+}
+
+#[derive(Debug, Clone)]
+pub struct LogViewerOptions {
+    pub content: String,
+    pub height: u16,
+    pub show_scrollbar: bool,
+    pub auto_scroll: bool,
+}
+
+impl Default for LogViewerOptions {
+    fn default() -> Self {
+        Self {
+            content: String::new(),
+            height: 12,
+            show_scrollbar: true,
+            auto_scroll: true,
+        }
+    }
+}
+
+pub fn LogViewer(props: LogViewerOptions) -> VNode {
+    let lines: Vec<VNode> = props
+        .content
+        .lines()
+        .map(|line| VNode::text(line.to_string()))
+        .collect();
+
+    let mut area = ScrollArea::new().content(lines).height(props.height);
+
+    if !props.show_scrollbar {
+        area = area.scrollbar(ScrollbarVisibility::Never);
+    }
+    area.build()
+}
+
+pub fn createLogViewer(props: LogViewerOptions) -> VNode {
+    LogViewer(props)
+}
+
+#[cfg(test)]
 #[cfg(test)]
 mod tests {
     use super::*;

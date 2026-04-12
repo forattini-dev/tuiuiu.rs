@@ -2,7 +2,7 @@
 //!
 //! Legend for data visualization charts.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// Legend item.
@@ -217,15 +217,18 @@ impl Legend {
         let parts: Vec<VNode> = vec![
             VNode::styled_text(marker.to_string(), marker_style),
             VNode::styled_text(
-                format!(" {}", if self.show_values {
-                    if let Some(value) = &item.value {
-                        format!("{} ({})", item.label, value)
+                format!(
+                    " {}",
+                    if self.show_values {
+                        if let Some(value) = &item.value {
+                            format!("{} ({})", item.label, value)
+                        } else {
+                            item.label.clone()
+                        }
                     } else {
                         item.label.clone()
                     }
-                } else {
-                    item.label.clone()
-                }),
+                ),
                 label_style,
             ),
         ];
@@ -256,7 +259,11 @@ impl Legend {
         }
 
         // Build items
-        let items: Vec<VNode> = self.items.iter().map(|item| self.build_item(item)).collect();
+        let items: Vec<VNode> = self
+            .items
+            .iter()
+            .map(|item| self.build_item(item))
+            .collect();
 
         // Create items container
         let items_container = VNode::Box(BoxNode {
@@ -266,7 +273,11 @@ impl Legend {
                     LegendLayout::Horizontal => FlexDirection::Row,
                     LegendLayout::Vertical => FlexDirection::Column,
                 }),
-                gap: Some(if self.layout == LegendLayout::Horizontal { 2 } else { 0 }),
+                gap: Some(if self.layout == LegendLayout::Horizontal {
+                    2
+                } else {
+                    0
+                }),
                 ..Default::default()
             },
             ..Default::default()

@@ -220,10 +220,7 @@ impl Checkbox {
             output.push_str(&format!("\x1b[2;38;2;{}m{}\x1b[0m", color_rgb, symbol));
         } else if state.is_checked() {
             // Checked: use checked background with check color
-            output.push_str(&format!(
-                "\x1b[38;2;{}m{}\x1b[0m",
-                check_rgb, symbol
-            ));
+            output.push_str(&format!("\x1b[38;2;{}m{}\x1b[0m", check_rgb, symbol));
         } else {
             output.push_str(&format!("\x1b[38;2;{}m{}\x1b[0m", color_rgb, symbol));
         }
@@ -288,9 +285,7 @@ mod tests {
 
     #[test]
     fn test_checkbox_with_label() {
-        let checkbox = Checkbox::new()
-            .label("Accept terms")
-            .checked(true);
+        let checkbox = Checkbox::new().label("Accept terms").checked(true);
         let output = checkbox.render();
         assert!(output.contains("Accept terms"));
         assert!(output.contains("☑"));

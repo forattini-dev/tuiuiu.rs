@@ -2,7 +2,7 @@
 //!
 //! Date picker and calendar view.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 /// Calendar component.
 #[derive(Debug, Clone)]
@@ -84,8 +84,16 @@ impl Calendar {
     /// Get the day of week for the first day (0 = Mon, 6 = Sun).
     fn first_day_of_week(&self) -> u32 {
         // Zeller's formula (simplified)
-        let y = if self.month <= 2 { self.year - 1 } else { self.year };
-        let m = if self.month <= 2 { self.month as i32 + 12 } else { self.month as i32 };
+        let y = if self.month <= 2 {
+            self.year - 1
+        } else {
+            self.year
+        };
+        let m = if self.month <= 2 {
+            self.month as i32 + 12
+        } else {
+            self.month as i32
+        };
 
         let q = 1i32; // First day
         let k = y % 100;
@@ -127,7 +135,11 @@ impl Calendar {
         // Header: Month Year
         children.push(VNode::styled_text(
             format!("  {} {}  ", self.month_name(), self.year),
-            TextStyle { color: Some(Color::Named(NamedColor::Cyan)), bold: true, ..Default::default() }
+            TextStyle {
+                color: Some(Color::Named(NamedColor::Cyan)),
+                bold: true,
+                ..Default::default()
+            },
         ));
 
         // Day headers
@@ -143,7 +155,10 @@ impl Calendar {
             day_headers.to_string()
         };
 
-        children.push(VNode::styled_text(header, TextStyle::color(Color::Named(NamedColor::Gray))));
+        children.push(VNode::styled_text(
+            header,
+            TextStyle::color(Color::Named(NamedColor::Gray)),
+        ));
 
         // Days grid
         let days_in_month = self.days_in_month();
@@ -179,10 +194,14 @@ impl Calendar {
                 }
             }
 
-            let is_today_week = self.today.map(|(y, m, d)| {
-                y == self.year && m == self.month &&
-                (d >= current_day.saturating_sub(7) && d < current_day)
-            }).unwrap_or(false);
+            let is_today_week = self
+                .today
+                .map(|(y, m, d)| {
+                    y == self.year
+                        && m == self.month
+                        && (d >= current_day.saturating_sub(7) && d < current_day)
+                })
+                .unwrap_or(false);
 
             let color = if is_today_week {
                 Color::Named(NamedColor::Yellow)

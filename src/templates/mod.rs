@@ -5,23 +5,22 @@
 //! - **App Structure**: AppShell, Page, Header, Footer, Sidebar, StatusBar
 //! - **Containers**: Container, Card, Panel
 
-mod stack;
 mod app_shell;
 mod header;
-mod status_bar;
 mod page;
+mod stack;
+mod status_bar;
 
 // Re-export stack layouts
 pub use stack::{
-    VStack, HStack, Center, FullScreen, Spacer,
-    VAlign, HAlign, HJustify, LayoutProps,
+    Center, FullScreen, HAlign, HJustify, HStack, LayoutProps, Spacer, VAlign, VStack,
 };
 
 // Re-export app structure templates
 pub use app_shell::{AppShell, SidebarPosition};
 pub use header::{Header, NavItem};
+pub use page::{Breadcrumb, Page};
 pub use status_bar::{StatusBar, StatusItem, StatusMode};
-pub use page::{Page, Breadcrumb};
 
 // =============================================================================
 // Stub Types (to be implemented)

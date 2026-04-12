@@ -111,7 +111,11 @@ impl FpsState {
 
         // Remove frames older than 1 second
         let one_second_ago = now - std::time::Duration::from_secs(1);
-        while self.frame_times.front().map_or(false, |&t| t < one_second_ago) {
+        while self
+            .frame_times
+            .front()
+            .map_or(false, |&t| t < one_second_ago)
+        {
             self.frame_times.pop_front();
         }
 

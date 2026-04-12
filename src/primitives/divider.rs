@@ -2,7 +2,7 @@
 //!
 //! Horizontal or vertical line separator.
 
-use crate::core::component::{VNode, TextNode, TextStyle, Color, NamedColor};
+use crate::core::component::{Color, NamedColor, TextNode, TextStyle, VNode};
 
 /// Divider orientation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -72,19 +72,31 @@ impl Divider {
 
     /// Use dashed style.
     pub fn dashed(mut self) -> Self {
-        self.char = if self.orientation == DividerOrientation::Horizontal { '╌' } else { '╎' };
+        self.char = if self.orientation == DividerOrientation::Horizontal {
+            '╌'
+        } else {
+            '╎'
+        };
         self
     }
 
     /// Use double style.
     pub fn double(mut self) -> Self {
-        self.char = if self.orientation == DividerOrientation::Horizontal { '═' } else { '║' };
+        self.char = if self.orientation == DividerOrientation::Horizontal {
+            '═'
+        } else {
+            '║'
+        };
         self
     }
 
     /// Use bold style.
     pub fn bold(mut self) -> Self {
-        self.char = if self.orientation == DividerOrientation::Horizontal { '━' } else { '┃' };
+        self.char = if self.orientation == DividerOrientation::Horizontal {
+            '━'
+        } else {
+            '┃'
+        };
         self
     }
 

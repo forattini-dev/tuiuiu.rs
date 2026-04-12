@@ -11,31 +11,32 @@
 //! - **Tick**: Global animation tick system
 //! - **Component**: Component trait and types
 
-pub mod signals;
-pub mod layout;
-pub mod renderer;
-pub mod terminal;
+pub mod animation;
 pub mod app;
+pub mod capabilities;
+pub mod command_palette;
+pub mod component;
 pub mod event;
 pub mod focus;
-pub mod tick;
-pub mod component;
-pub mod hotkeys;
-pub mod animation;
-pub mod capabilities;
 pub mod graphics;
-pub mod virtual_scroll;
+pub mod hotkeys;
 pub mod key_bindings;
-pub mod command_palette;
+pub mod layout;
+pub mod renderer;
 pub mod screen;
+pub mod signals;
+pub mod terminal;
+pub mod tick;
+pub mod virtual_scroll;
 
 // Re-exports for convenience
-pub use signals::*;
-pub use layout::*;
-pub use renderer::*;
-pub use terminal::*;
 pub use app::*;
+pub use command_palette::*;
+pub use component::*;
 pub use event::*;
 pub use focus::*;
+pub use layout::*;
+pub use renderer::*;
+pub use signals::*;
+pub use terminal::*;
 pub use tick::*;
-pub use component::*;

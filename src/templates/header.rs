@@ -9,7 +9,7 @@
 //! ```
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 
@@ -421,9 +421,7 @@ mod tests {
 
     #[test]
     fn test_header_with_title() {
-        let header = Header::new()
-            .title("My App")
-            .build();
+        let header = Header::new().title("My App").build();
 
         if let VNode::Box(node) = header {
             assert!(!node.children.is_empty());
@@ -434,10 +432,7 @@ mod tests {
 
     #[test]
     fn test_header_with_logo() {
-        let header = Header::new()
-            .logo("☰")
-            .title("App")
-            .build();
+        let header = Header::new().logo("☰").title("App").build();
 
         matches!(header, VNode::Box(_));
     }
@@ -454,9 +449,7 @@ mod tests {
 
     #[test]
     fn test_nav_item() {
-        let item = NavItem::new("Home")
-            .active(true)
-            .icon("🏠");
+        let item = NavItem::new("Home").active(true).icon("🏠");
 
         assert_eq!(item.label, "Home");
         assert!(item.active);

@@ -9,14 +9,14 @@ use super::colors::*;
 use super::types::*;
 
 // Solarized base colors
-const SOL_BASE03: &str = "#002b36";   // Background (darkest)
-const SOL_BASE02: &str = "#073642";   // Background highlights
-const SOL_BASE01: &str = "#586e75";   // Comments, secondary content
-const SOL_BASE00: &str = "#657b83";   // (Light mode: body text)
-const SOL_BASE0: &str = "#839496";    // Body text
-const SOL_BASE1: &str = "#93a1a1";    // Optional emphasized content
-const SOL_BASE2: &str = "#eee8d5";    // (Light mode: background highlights)
-const SOL_BASE3: &str = "#fdf6e3";    // (Light mode: background)
+const SOL_BASE03: &str = "#002b36"; // Background (darkest)
+const SOL_BASE02: &str = "#073642"; // Background highlights
+const SOL_BASE01: &str = "#586e75"; // Comments, secondary content
+const SOL_BASE00: &str = "#657b83"; // (Light mode: body text)
+const SOL_BASE0: &str = "#839496"; // Body text
+const SOL_BASE1: &str = "#93a1a1"; // Optional emphasized content
+const SOL_BASE2: &str = "#eee8d5"; // (Light mode: background highlights)
+const SOL_BASE3: &str = "#fdf6e3"; // (Light mode: background)
 
 // Solarized accent colors
 const SOL_YELLOW: &str = "#b58900";

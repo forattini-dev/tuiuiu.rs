@@ -9,7 +9,7 @@
 //! - Border and padding
 //! - Pre-made ASCII patterns
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 use std::collections::HashMap;
 
@@ -31,7 +31,11 @@ pub struct Pixel {
 impl Pixel {
     /// Create a new pixel.
     pub fn new(char: char) -> Self {
-        Self { char, fg: None, bg: None }
+        Self {
+            char,
+            fg: None,
+            bg: None,
+        }
     }
 
     /// Set foreground color.
@@ -74,15 +78,18 @@ pub fn create_pixel_grid(source: &str, palette: &ColorPalette) -> PixelGrid {
 
 /// Create a pixel grid from color map using block characters.
 pub fn create_pixel_grid_from_colors(colors: &[Vec<Option<Color>>], char: char) -> PixelGrid {
-    colors.iter().map(|row| {
-        row.iter().map(|color| {
-            Pixel {
-                char: if color.is_some() { char } else { ' ' },
-                fg: color.clone(),
-                bg: None,
-            }
-        }).collect()
-    }).collect()
+    colors
+        .iter()
+        .map(|row| {
+            row.iter()
+                .map(|color| Pixel {
+                    char: if color.is_some() { char } else { ' ' },
+                    fg: color.clone(),
+                    bg: None,
+                })
+                .collect()
+        })
+        .collect()
 }
 
 // =============================================================================
@@ -236,7 +243,8 @@ fn process_lines(
                 result = new;
             }
         }
-    } else if result.len() > target_height && (fit == PictureFit::Crop || fit == PictureFit::Cover) {
+    } else if result.len() > target_height && (fit == PictureFit::Crop || fit == PictureFit::Cover)
+    {
         let excess = result.len() - target_height;
         match align_y {
             PictureAlignY::Top => result.truncate(target_height),
@@ -249,16 +257,21 @@ fn process_lines(
     }
 
     // Adjust width for each line
-    result.iter().map(|line| {
-        let line_width = visible_width(line);
-        if line_width < target_width {
-            pad_line(line, target_width, align_x)
-        } else if line_width > target_width && (fit == PictureFit::Crop || fit == PictureFit::Cover) {
-            crop_line(line, target_width, align_x)
-        } else {
-            pad_line(line, target_width, align_x)
-        }
-    }).collect()
+    result
+        .iter()
+        .map(|line| {
+            let line_width = visible_width(line);
+            if line_width < target_width {
+                pad_line(line, target_width, align_x)
+            } else if line_width > target_width
+                && (fit == PictureFit::Crop || fit == PictureFit::Cover)
+            {
+                crop_line(line, target_width, align_x)
+            } else {
+                pad_line(line, target_width, align_x)
+            }
+        })
+        .collect()
 }
 
 // =============================================================================
@@ -369,23 +382,38 @@ impl Picture {
         let target_height = self.props.height.unwrap_or(src_height);
 
         // Process lines
-        lines = process_lines(lines, target_width, target_height, self.props.fit, self.props.align_x, self.props.align_y);
+        lines = process_lines(
+            lines,
+            target_width,
+            target_height,
+            self.props.fit,
+            self.props.align_x,
+            self.props.align_y,
+        );
 
         // Apply transparency
         if let Some(trans) = self.props.transparent {
-            lines = lines.iter().map(|line| {
-                line.chars().map(|c| if c == trans { ' ' } else { c }).collect()
-            }).collect();
+            lines = lines
+                .iter()
+                .map(|line| {
+                    line.chars()
+                        .map(|c| if c == trans { ' ' } else { c })
+                        .collect()
+                })
+                .collect();
         }
 
         // Build content
-        let content: Vec<VNode> = lines.iter().map(|line| {
-            let style = TextStyle {
-                color: self.props.color.clone(),
-                ..Default::default()
-            };
-            VNode::styled_text(line.clone(), style)
-        }).collect();
+        let content: Vec<VNode> = lines
+            .iter()
+            .map(|line| {
+                let style = TextStyle {
+                    color: self.props.color.clone(),
+                    ..Default::default()
+                };
+                VNode::styled_text(line.clone(), style)
+            })
+            .collect();
 
         // Wrap in Box if border or padding needed
         if self.props.border_style.is_some() || self.props.padding > 0 {
@@ -513,14 +541,16 @@ impl ColoredPicture {
                 PictureAlignY::Top => y,
                 PictureAlignY::Center => {
                     if target_height > grid_height {
-                        y.checked_sub((target_height - grid_height) / 2).unwrap_or(usize::MAX)
+                        y.checked_sub((target_height - grid_height) / 2)
+                            .unwrap_or(usize::MAX)
                     } else {
                         y
                     }
                 }
                 PictureAlignY::Bottom => {
                     if target_height > grid_height {
-                        y.checked_sub(target_height - grid_height).unwrap_or(usize::MAX)
+                        y.checked_sub(target_height - grid_height)
+                            .unwrap_or(usize::MAX)
                     } else {
                         y
                     }
@@ -547,14 +577,16 @@ impl ColoredPicture {
                     PictureAlignX::Left => x,
                     PictureAlignX::Center => {
                         if target_width > row.len() {
-                            x.checked_sub((target_width - row.len()) / 2).unwrap_or(usize::MAX)
+                            x.checked_sub((target_width - row.len()) / 2)
+                                .unwrap_or(usize::MAX)
                         } else {
                             x
                         }
                     }
                     PictureAlignX::Right => {
                         if target_width > row.len() {
-                            x.checked_sub(target_width - row.len()).unwrap_or(usize::MAX)
+                            x.checked_sub(target_width - row.len())
+                                .unwrap_or(usize::MAX)
                         } else {
                             x
                         }
@@ -566,7 +598,10 @@ impl ColoredPicture {
                 if pixel.is_none() || src_x >= row.len() {
                     // Flush current text if style changes
                     if !current_text.is_empty() {
-                        segments.push(VNode::styled_text(current_text.clone(), current_style.clone()));
+                        segments.push(VNode::styled_text(
+                            current_text.clone(),
+                            current_style.clone(),
+                        ));
                         current_text.clear();
                     }
                     current_text.push(' ');
@@ -582,7 +617,10 @@ impl ColoredPicture {
 
                 // Check if style changed
                 if new_style.color != current_style.color && !current_text.is_empty() {
-                    segments.push(VNode::styled_text(current_text.clone(), current_style.clone()));
+                    segments.push(VNode::styled_text(
+                        current_text.clone(),
+                        current_style.clone(),
+                    ));
                     current_text.clear();
                 }
 
@@ -652,7 +690,10 @@ impl AsciiPatterns {
 
     /// Vertical line.
     pub fn vline(height: usize, char: char) -> String {
-        (0..height).map(|_| char.to_string()).collect::<Vec<_>>().join("\n")
+        (0..height)
+            .map(|_| char.to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     /// Box shape.
@@ -663,9 +704,23 @@ impl AsciiPatterns {
             ('┌', '┐', '└', '┘', '─', '│')
         };
 
-        let top = format!("{}{}{}", tl, std::iter::repeat(h).take(width.saturating_sub(2)).collect::<String>(), tr);
+        let top = format!(
+            "{}{}{}",
+            tl,
+            std::iter::repeat(h)
+                .take(width.saturating_sub(2))
+                .collect::<String>(),
+            tr
+        );
         let middle = format!("{}{}{}", v, " ".repeat(width.saturating_sub(2)), v);
-        let bottom = format!("{}{}{}", bl, std::iter::repeat(h).take(width.saturating_sub(2)).collect::<String>(), br);
+        let bottom = format!(
+            "{}{}{}",
+            bl,
+            std::iter::repeat(h)
+                .take(width.saturating_sub(2))
+                .collect::<String>(),
+            br
+        );
 
         let mut lines = vec![top];
         for _ in 0..height.saturating_sub(2) {
@@ -731,12 +786,7 @@ pub fn create_banner(text: &str, style: &str) -> String {
     let width = text.len() + 4;
 
     match style {
-        "simple" => format!(
-            "{}\n  {}\n{}",
-            "═".repeat(width),
-            text,
-            "═".repeat(width)
-        ),
+        "simple" => format!("{}\n  {}\n{}", "═".repeat(width), text, "═".repeat(width)),
         "box" => format!(
             "┌{}┐\n│ {} │\n└{}┘",
             "─".repeat(width - 2),

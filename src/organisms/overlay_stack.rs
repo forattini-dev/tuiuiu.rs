@@ -3,8 +3,8 @@
 //! Manages stacked overlays (modals, popovers, tooltips) with z-index management
 //! and focus trapping.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle};
-use crate::core::layout::{FlexDirection, JustifyContent, AlignItems};
+use crate::core::component::{BoxNode, BoxStyle, VNode};
+use crate::core::layout::{AlignItems, FlexDirection, JustifyContent};
 
 /// Overlay entry in the stack.
 #[derive(Debug, Clone)]
@@ -228,5 +228,191 @@ impl OverlayStack {
             },
             ..Default::default()
         })
+    }
+}
+
+// =============================================================================
+// JS-Compatible API
+// =============================================================================
+
+/// Overlay priority levels.
+#[derive(Debug, Clone, Copy, Default)]
+pub enum OverlayPriority {
+    /// Lowest priority.
+    Low,
+    /// Normal priority.
+    #[default]
+    Normal,
+    /// High priority.
+    High,
+    /// Critical priority.
+    Critical,
+}
+
+/// Render function type for an overlay.
+pub type OverlayRenderer = fn() -> VNode;
+
+/// Component used by `OverlayContainer` as optional backdrop renderer.
+pub type OverlayBackdropRenderer = fn(&OverlayEntry) -> Option<VNode>;
+
+/// Configuration used to describe an overlay before mounting.
+#[derive(Debug, Clone)]
+pub struct OverlayConfig {
+    /// Overlay id.
+    pub id: String,
+    /// Overlay component.
+    pub component: OverlayRenderer,
+    /// Priority.
+    pub priority: OverlayPriority,
+    /// Close when escape is pressed.
+    pub close_on_escape: bool,
+    /// Close when clicking outside.
+    pub close_on_click_outside: bool,
+    /// Show backdrop.
+    pub show_backdrop: bool,
+}
+
+impl OverlayConfig {
+    /// Build an [`OverlayEntry`] from this config.
+    pub fn into_entry(self) -> OverlayEntry {
+        let mut entry = OverlayEntry::new(self.id, (self.component)());
+        entry.backdrop = self.show_backdrop;
+        entry.close_on_backdrop_click = self.close_on_click_outside;
+        // Use modal only when backdrop is active.
+        entry.modal = self.show_backdrop && self.close_on_escape;
+        entry
+    }
+}
+
+/// Props for [`OverlayContainer`].
+pub struct OverlayContainerProps {
+    /// Overlay state.
+    pub stack: OverlayStackState,
+    /// Optional backdrop renderer.
+    pub render_backdrop: Option<OverlayBackdropRenderer>,
+}
+
+/// Options for a lightweight overlay input hook.
+pub struct UseOverlayInputOptions {
+    /// Target stack.
+    pub stack: OverlayStackState,
+    /// Handle escape key.
+    pub handle_escape: bool,
+}
+
+/// Create a new overlay stack.
+pub fn createOverlayStack() -> OverlayStackState {
+    create_overlay_stack_state()
+}
+
+/// Snake case alias.
+pub fn create_overlay_stack() -> OverlayStackState {
+    create_overlay_stack_state()
+}
+
+/// Keep input handling blocked while any overlay is active.
+pub fn shouldBlockInput(stack: &OverlayStackState) -> bool {
+    !stack.is_empty()
+}
+
+/// Close the top overlay on escape if applicable.
+pub fn handleOverlayEscape(stack: &mut OverlayStackState) -> bool {
+    if stack.is_empty() {
+        return false;
+    }
+
+    stack.pop();
+    true
+}
+
+/// Container that renders overlays in order.
+pub fn OverlayContainer(props: OverlayContainerProps) -> VNode {
+    let mut children: Vec<VNode> = Vec::new();
+
+    for entry in props.stack.entries() {
+        if entry.backdrop {
+            let backdrop = props.render_backdrop.map(|render| render(entry));
+            if let Some(Some(node)) = backdrop {
+                children.push(node);
+            }
+        }
+        children.push(VNode::Box(BoxNode {
+            children: vec![entry.content.clone()],
+            style: BoxStyle {
+                justify_content: Some(JustifyContent::Center),
+                align_items: Some(AlignItems::Center),
+                ..Default::default()
+            },
+            ..Default::default()
+        }));
+    }
+
+    VNode::Box(BoxNode {
+        children,
+        style: BoxStyle {
+            flex_direction: Some(FlexDirection::Column),
+            ..Default::default()
+        },
+        ..Default::default()
+    })
+}
+
+/// Create common modal overlay config.
+pub fn createModalOverlay(options: OverlayConfigBuilder) -> OverlayConfig {
+    OverlayConfig {
+        id: options.id,
+        component: options.component,
+        priority: options.priority.unwrap_or(OverlayPriority::Normal),
+        close_on_escape: options.close_on_escape.unwrap_or(true),
+        close_on_click_outside: options.close_on_click_outside.unwrap_or(false),
+        show_backdrop: options.show_backdrop.unwrap_or(true),
+    }
+}
+
+/// Create toast overlay config.
+pub fn createToastOverlay(options: OverlayConfigBuilder) -> OverlayConfig {
+    OverlayConfig {
+        id: options.id,
+        component: options.component,
+        priority: OverlayPriority::Low,
+        close_on_escape: false,
+        close_on_click_outside: false,
+        show_backdrop: false,
+    }
+}
+
+/// Create critical overlay config.
+pub fn createCriticalOverlay(options: OverlayConfigBuilder) -> OverlayConfig {
+    OverlayConfig {
+        id: options.id,
+        component: options.component,
+        priority: OverlayPriority::Critical,
+        close_on_escape: options.close_on_escape.unwrap_or(false),
+        close_on_click_outside: options.close_on_click_outside.unwrap_or(false),
+        show_backdrop: options.show_backdrop.unwrap_or(true),
+    }
+}
+
+/// Helper for constructing overlay configs without repetitive literals.
+pub struct OverlayConfigBuilder {
+    pub id: String,
+    pub component: OverlayRenderer,
+    pub priority: Option<OverlayPriority>,
+    pub close_on_escape: Option<bool>,
+    pub close_on_click_outside: Option<bool>,
+    pub show_backdrop: Option<bool>,
+}
+
+impl OverlayConfigBuilder {
+    /// Build from simple options.
+    pub fn new(id: impl Into<String>, component: OverlayRenderer) -> Self {
+        Self {
+            id: id.into(),
+            component,
+            priority: None,
+            close_on_escape: None,
+            close_on_click_outside: None,
+            show_backdrop: None,
+        }
     }
 }

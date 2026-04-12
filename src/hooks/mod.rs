@@ -23,94 +23,96 @@
 //! - `use_previous`: Track previous values
 //! - `use_animation`: Value animations and transitions
 
-mod state;
+mod animation;
+mod clipboard;
 mod effects;
-mod input;
-mod mouse;
 mod focus;
-mod terminal;
-mod hotkeys;
 mod form;
-mod timing;
-mod navigation;
-mod threshold;
 mod format;
 mod fps;
+mod hotkeys;
+mod input;
 mod layout;
 mod local_mouse;
-mod clipboard;
+mod mouse;
+mod navigation;
 mod previous;
-mod animation;
+mod state;
+mod terminal;
+mod threshold;
+mod timing;
 
-pub use state::{use_state, use_reducer, use_ref, use_lazy_state, use_toggle, use_counter, State};
-pub use effects::{use_effect, use_memo, use_callback, use_mount, use_cleanup};
-pub use input::{use_input, use_key, dispatch_key_event, clear_input_handlers, key_matches, InputHandler};
-pub use mouse::{use_mouse, dispatch_mouse_event, clear_mouse_handlers, use_mouse_position, MouseHandler, MousePosition};
-pub use focus::{use_focus, use_focus_manager, FocusOptions, FocusResult};
-pub use terminal::{use_terminal_size, use_dimensions};
-pub use hotkeys::{
-    use_hotkeys, HotkeyBinding, HotkeyHandler, HotkeyOptions,
-    register_hotkey, trigger_hotkey, get_registered_hotkeys,
-    get_hotkey_scope, set_hotkey_scope, reset_hotkey_scope,
-    parse_hotkeys, matches_hotkey, format_hotkey,
-    format_hotkey_platform, is_mac,
-};
-pub use form::{
-    use_form, create_form,
-    FormField, FormHandle, FormState, FieldValue, ValidationResult,
-    validators,
-};
-pub use timing::{
-    use_interval, use_interval_with_options, IntervalHandle, IntervalOptions,
-    use_timeout, use_timeout_paused, TimeoutHandle, TimeoutState,
-    use_debounce, DebounceHandle,
-    use_throttle, ThrottleHandle,
-};
-pub use navigation::{
-    use_navigation, create_navigation, simple_steps,
-    NavigationState, NavigationStep, NavigationResult,
-};
-pub use threshold::{
-    use_threshold_color, auto_threshold_color,
-    ThresholdConfig, ThresholdRange, ThresholdColor,
-    lerp_color, color_gradient,
-    health_thresholds, percentage_thresholds, inverted_percentage_thresholds,
-    temperature_thresholds, binary_thresholds,
-};
-pub use format::{
-    use_format_bytes, use_format_bytes_si, use_format_duration, use_format_duration_compact,
-    use_format_number, use_format_compact, use_format_percent, use_format_currency,
-    use_format_relative, use_format_delta,
-};
-pub use fps::{
-    use_fps, track_frame, get_fps, get_fps_metrics, reset_fps,
-    FpsMetrics, FpsColor,
-};
-pub use layout::{
-    use_layout_ref, use_layout_ref_with, create_layout_ref,
-    LayoutRef, LayoutRect,
-};
-pub use local_mouse::{
-    use_local_mouse, use_local_mouse_with,
-    LocalMouseHandler, LocalMouseEvent, LocalMouseOptions,
-    RawMouseEvent, MouseButton, MouseAction, Modifiers, Bounds,
+pub use animation::{
+    lerp, map_range, use_animation, use_fade_in, use_fade_out, use_slide, AnimationHandle,
+    AnimationState, Easing,
 };
 pub use clipboard::{
-    use_clipboard, copy_to_clipboard, read_clipboard, clear_clipboard,
-    ClipboardHandle,
+    clear_clipboard, copy_to_clipboard, read_clipboard, use_clipboard, ClipboardHandle,
 };
-pub use previous::{
-    use_previous, use_changed,
-    PreviousHandle,
+pub use effects::{use_callback, use_cleanup, use_effect, use_memo, use_mount};
+pub use focus::{use_focus, use_focus_manager, FocusOptions, FocusResult};
+pub use form::{
+    create_form, use_form, validators, FieldValue, FormField, FormHandle, FormState,
+    ValidationResult,
 };
-pub use animation::{
-    use_animation, use_fade_in, use_fade_out, use_slide,
-    lerp, map_range,
-    AnimationHandle, AnimationState, Easing,
+pub use format::{
+    use_format_bytes, use_format_bytes_si, use_format_compact, use_format_currency,
+    use_format_delta, use_format_duration, use_format_duration_compact, use_format_number,
+    use_format_percent, use_format_relative,
+};
+pub use fps::{get_fps, get_fps_metrics, reset_fps, track_frame, use_fps, FpsColor, FpsMetrics};
+pub use hotkeys::{
+    format_hotkey, format_hotkey_platform, get_hotkey_scope, get_registered_hotkeys, is_mac,
+    matches_hotkey, parse_hotkeys, register_hotkey, reset_hotkey_scope, set_hotkey_scope,
+    trigger_hotkey, use_hotkeys, HotkeyBinding, HotkeyHandler, HotkeyOptions,
+};
+pub use input::{
+    clear_input_handlers, dispatch_key_event, key_matches, use_input, use_key, InputHandler,
+};
+pub use layout::{create_layout_ref, use_layout_ref, use_layout_ref_with, LayoutRect, LayoutRef};
+pub use local_mouse::{
+    use_local_mouse, use_local_mouse_with, Bounds, LocalMouseEvent, LocalMouseHandler,
+    LocalMouseOptions, Modifiers, MouseAction, MouseButton, RawMouseEvent,
+};
+pub use mouse::{
+    clear_mouse_handlers, dispatch_mouse_event, use_mouse, use_mouse_position, MouseHandler,
+    MousePosition,
+};
+pub use navigation::{
+    create_navigation, simple_steps, use_navigation, NavigationResult, NavigationState,
+    NavigationStep,
+};
+pub use previous::{use_changed, use_previous, PreviousHandle};
+pub use state::{use_counter, use_lazy_state, use_reducer, use_ref, use_state, use_toggle, State};
+pub use terminal::{use_dimensions, use_terminal_size};
+pub use threshold::{
+    auto_threshold_color, binary_thresholds, color_gradient, health_thresholds,
+    inverted_percentage_thresholds, lerp_color, percentage_thresholds, temperature_thresholds,
+    use_threshold_color, ThresholdColor, ThresholdConfig, ThresholdRange,
+};
+pub use timing::{
+    use_debounce, use_interval, use_interval_with_options, use_throttle, use_timeout,
+    use_timeout_paused, DebounceHandle, IntervalHandle, IntervalOptions, ThrottleHandle,
+    TimeoutHandle, TimeoutState,
 };
 
 // Re-export from core
 pub use crate::core::hotkeys::parse_hotkey;
+
+/// Compatibility helper that keeps the JS entrypoint name.
+pub fn parse_keypress(s: &str) -> crate::core::hotkeys::ParsedHotkey {
+    parse_hotkey(s)
+}
+
+/// Cancel an interval handle.
+pub fn cleanup_interval(handle: &IntervalHandle) {
+    handle.stop();
+}
+
+/// Cancel a timeout handle.
+pub fn cleanup_timeout(handle: &TimeoutHandle) {
+    handle.cancel();
+}
 
 use crate::core::app::AppContext;
 

@@ -585,7 +585,10 @@ fn layout_children(
     }
 
     // Calculate starting position based on justify-content
-    let total_final_main: u16 = final_sizes.iter().map(|(w, h)| if is_row { *w } else { *h }).sum();
+    let total_final_main: u16 = final_sizes
+        .iter()
+        .map(|(w, h)| if is_row { *w } else { *h })
+        .sum();
     let total_with_gaps = total_final_main + total_gap;
     let extra_space = main_size.saturating_sub(total_with_gaps);
 

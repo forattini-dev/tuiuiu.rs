@@ -5,17 +5,18 @@
 //! keyboard navigation.
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 use crate::core::signals::{create_signal, ReadSignal, WriteSignal};
+use std::sync::Arc;
 
 // =============================================================================
 // Command Definition
 // =============================================================================
 
 /// A single command that can be executed from the palette.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Command {
     /// Unique identifier for the command.
     pub id: String,
@@ -33,6 +34,43 @@ pub struct Command {
     pub disabled: bool,
     /// Search keywords (in addition to label).
     pub keywords: Vec<String>,
+    /// Action executed when the command is confirmed.
+    pub action: Option<CommandAction>,
+}
+
+impl std::fmt::Debug for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Command")
+            .field("id", &self.id)
+            .field("label", &self.label)
+            .field("description", &self.description)
+            .field("shortcut", &self.shortcut)
+            .field("group", &self.group)
+            .field("icon", &self.icon)
+            .field("disabled", &self.disabled)
+            .field("keywords", &self.keywords)
+            .field("has_action", &self.action.is_some())
+            .finish()
+    }
+}
+
+/// Action callback for a command entry.
+pub type CommandAction = Arc<dyn Fn() + Send + Sync + 'static>;
+
+impl Default for Command {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            label: String::new(),
+            description: None,
+            shortcut: None,
+            group: None,
+            icon: None,
+            disabled: false,
+            keywords: Vec::new(),
+            action: None,
+        }
+    }
 }
 
 impl Command {
@@ -47,6 +85,7 @@ impl Command {
             icon: None,
             disabled: false,
             keywords: Vec::new(),
+            action: None,
         }
     }
 
@@ -68,6 +107,12 @@ impl Command {
         self
     }
 
+    /// Set the category (alias for [`group`]).
+    pub fn category(mut self, category: impl Into<String>) -> Self {
+        self.group = Some(category.into());
+        self
+    }
+
     /// Set the icon.
     pub fn icon(mut self, icon: impl Into<String>) -> Self {
         self.icon = Some(icon.into());
@@ -83,6 +128,15 @@ impl Command {
     /// Add search keywords.
     pub fn keywords(mut self, keywords: Vec<&str>) -> Self {
         self.keywords = keywords.into_iter().map(String::from).collect();
+        self
+    }
+
+    /// Assign an action callback.
+    pub fn action<F>(mut self, action: F) -> Self
+    where
+        F: Fn() + Send + Sync + 'static,
+    {
+        self.action = Some(Arc::new(action));
         self
     }
 
@@ -380,9 +434,7 @@ impl CommandPalette {
             .collect();
 
         // Sort by match score (descending)
-        results.sort_by(|a, b| {
-            b.match_score(&self.query).cmp(&a.match_score(&self.query))
-        });
+        results.sort_by(|a, b| b.match_score(&self.query).cmp(&a.match_score(&self.query)));
 
         results
     }
@@ -660,7 +712,11 @@ impl CommandPalette {
 
         // Selection indicator
         let indicator = if selected {
-            if self.ascii { ">" } else { "▸" }
+            if self.ascii {
+                ">"
+            } else {
+                "▸"
+            }
         } else {
             " "
         };
@@ -824,12 +880,471 @@ impl From<CommandPalette> for VNode {
 }
 
 // =============================================================================
+// GoTo Dialog
+// =============================================================================
+
+/// Configuration for GoTo dialog rendering.
+#[derive(Debug, Clone)]
+pub struct GoToDialogProps {
+    /// Current input value.
+    pub value: String,
+    /// Maximum value accepted by the dialog.
+    pub max: usize,
+    /// Dialog title.
+    pub title: Option<String>,
+    /// Prompt text.
+    pub prompt: Option<String>,
+    /// Dialog width.
+    pub width: Option<u16>,
+    /// Border style.
+    pub border_style: Option<String>,
+    /// Border color.
+    pub border_color: Option<String>,
+}
+
+impl Default for GoToDialogProps {
+    fn default() -> Self {
+        Self {
+            value: String::new(),
+            max: 10,
+            title: None,
+            prompt: None,
+            width: Some(30),
+            border_style: Some("round".to_string()),
+            border_color: Some("blue".to_string()),
+        }
+    }
+}
+
+fn parse_border_style(name: Option<&str>) -> BorderStyle {
+    match name.unwrap_or("").to_lowercase().as_str() {
+        "single" => BorderStyle::Single,
+        "double" => BorderStyle::Double,
+        "round" => BorderStyle::Round,
+        "heavy" => BorderStyle::Bold,
+        "classic" => BorderStyle::Classic,
+        "none" | "hidden" => BorderStyle::None,
+        "dashed" => BorderStyle::Dashed,
+        "dotted" => BorderStyle::Dotted,
+        _ => BorderStyle::Round,
+    }
+}
+
+fn parse_named_color(name: Option<&str>) -> Color {
+    match name.unwrap_or("").to_lowercase().as_str() {
+        "black" => Color::Named(NamedColor::Black),
+        "red" => Color::Named(NamedColor::Red),
+        "green" => Color::Named(NamedColor::Green),
+        "yellow" => Color::Named(NamedColor::Yellow),
+        "blue" => Color::Named(NamedColor::Blue),
+        "magenta" => Color::Named(NamedColor::Magenta),
+        "cyan" => Color::Named(NamedColor::Cyan),
+        "white" => Color::Named(NamedColor::White),
+        "gray" | "bright_black" => Color::Named(NamedColor::Gray),
+        "bright_red" => Color::Named(NamedColor::BrightRed),
+        "bright_green" => Color::Named(NamedColor::BrightGreen),
+        "bright_yellow" => Color::Named(NamedColor::BrightYellow),
+        "bright_blue" => Color::Named(NamedColor::BrightBlue),
+        "bright_magenta" => Color::Named(NamedColor::BrightMagenta),
+        "bright_cyan" => Color::Named(NamedColor::BrightCyan),
+        "bright_white" => Color::Named(NamedColor::BrightWhite),
+        _ => Color::Named(NamedColor::Blue),
+    }
+}
+
+/// GoTo dialog component.
+pub fn go_to_dialog(props: GoToDialogProps) -> VNode {
+    let props = GoToDialogProps {
+        title: props.title.or_else(|| Some("Go To".to_string())),
+        prompt: props.prompt.or_else(|| Some("Enter number:".to_string())),
+        ..props
+    };
+
+    let width = props.width.unwrap_or(30);
+    let border_style = parse_border_style(props.border_style.as_deref());
+    let border_color = parse_named_color(props.border_color.as_deref());
+    let value = if props.value.is_empty() {
+        "_".to_string()
+    } else {
+        props.value.clone()
+    };
+    let help_text = "⏎ confirm  esc cancel";
+    let range_text = format!("(1-{})", props.max);
+    let display = format!("{} {}", props.prompt.unwrap_or_default(), value);
+
+    let header = VNode::Box(BoxNode {
+        id: None,
+        style: BoxStyle {
+            flex_direction: Some(FlexDirection::Row),
+            justify_content: Some(JustifyContent::SpaceBetween),
+            align_items: Some(AlignItems::Center),
+            ..Default::default()
+        },
+        children: vec![
+            VNode::Text(TextNode {
+                content: props.title.unwrap_or_default(),
+                style: TextStyle {
+                    color: Some(border_color),
+                    bold: true,
+                    ..Default::default()
+                },
+            }),
+            VNode::Text(TextNode {
+                content: range_text.clone(),
+                style: TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
+            }),
+        ],
+        handlers: Default::default(),
+    });
+
+    let input_row = VNode::Box(BoxNode {
+        id: None,
+        style: BoxStyle {
+            flex_direction: Some(FlexDirection::Row),
+            align_items: Some(AlignItems::Center),
+            gap: Some(1),
+            ..Default::default()
+        },
+        children: vec![
+            VNode::Text(TextNode {
+                content: display,
+                style: TextStyle {
+                    color: Some(Color::Named(NamedColor::White)),
+                    bold: true,
+                    ..Default::default()
+                },
+            }),
+            VNode::Text(TextNode {
+                content: range_text,
+                style: TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
+            }),
+        ],
+        handlers: Default::default(),
+    });
+
+    let footer = VNode::Text(TextNode {
+        content: help_text.to_string(),
+        style: TextStyle {
+            color: Some(Color::Named(NamedColor::Gray)),
+            dim: true,
+            ..Default::default()
+        },
+    });
+
+    VNode::Box(BoxNode {
+        id: None,
+        style: BoxStyle {
+            flex_direction: Some(FlexDirection::Column),
+            width: Some(Size::Fixed(width)),
+            border_style: Some(border_style),
+            border_color: Some(border_color),
+            padding: Some(1),
+            gap: Some(1),
+            ..Default::default()
+        },
+        children: vec![header, input_row, footer],
+        handlers: Default::default(),
+    })
+}
+
+#[allow(non_snake_case)]
+/// JS compatibility alias.
+pub fn GoToDialog(props: GoToDialogProps) -> VNode {
+    go_to_dialog(props)
+}
+
+/// Options for creating a GoTo dialog state.
+pub struct CreateGoToDialogOptions {
+    /// Maximum input value.
+    pub max: usize,
+    /// Optional confirm callback.
+    pub on_confirm: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    /// Optional close callback.
+    pub on_close: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Optional props.
+    pub props: Option<GoToDialogProps>,
+}
+
+impl Default for CreateGoToDialogOptions {
+    fn default() -> Self {
+        Self {
+            max: 10,
+            on_confirm: None,
+            on_close: None,
+            props: None,
+        }
+    }
+}
+
+/// Create a GoTo dialog state manager.
+pub fn create_go_to_dialog(options: CreateGoToDialogOptions) -> GoToDialogState {
+    let state = GoToDialogState::new(options.max);
+    state.set_props(options.props.unwrap_or_default());
+    state.set_on_confirm(options.on_confirm);
+    state.set_on_close(options.on_close);
+    state
+}
+
+#[allow(non_snake_case)]
+/// JS compatibility alias.
+pub fn createGoToDialog(options: CreateGoToDialogOptions) -> GoToDialogState {
+    create_go_to_dialog(options)
+}
+
+/// State manager for GoTo dialog.
+pub struct GoToDialogState {
+    open_read: ReadSignal<bool>,
+    open_write: WriteSignal<bool>,
+    value_read: ReadSignal<String>,
+    value_write: WriteSignal<String>,
+    max: usize,
+    on_confirm: std::sync::Mutex<Option<Arc<dyn Fn(usize) + Send + Sync>>>,
+    on_close: std::sync::Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
+    props: std::sync::Mutex<GoToDialogProps>,
+}
+
+impl GoToDialogState {
+    /// Create a new state manager.
+    pub fn new(max: usize) -> Self {
+        let (open_read, open_write) = create_signal(false);
+        let (value_read, value_write) = create_signal(String::new());
+        Self {
+            open_read,
+            open_write,
+            value_read,
+            value_write,
+            max,
+            on_confirm: std::sync::Mutex::new(None),
+            on_close: std::sync::Mutex::new(None),
+            props: std::sync::Mutex::new(GoToDialogProps {
+                max,
+                ..Default::default()
+            }),
+        }
+    }
+
+    /// Check whether dialog is open.
+    pub fn is_open(&self) -> bool {
+        self.open_read.get()
+    }
+
+    /// Show the dialog.
+    pub fn show(&self) {
+        self.open_write.set(true);
+    }
+
+    /// Hide the dialog.
+    pub fn hide(&self) {
+        self.open_write.set(false);
+    }
+
+    /// Current input value.
+    pub fn value(&self) -> String {
+        self.value_read.get()
+    }
+
+    /// Set current value.
+    pub fn set_value(&self, value: impl Into<String>) {
+        self.value_write.set(value.into());
+    }
+
+    /// Add one or more digits.
+    pub fn r#type(&self, text: &str) {
+        for ch in text.chars() {
+            self.type_char(ch);
+        }
+    }
+
+    /// Add one digit.
+    pub fn type_char(&self, ch: char) {
+        if ch.is_ascii_digit() {
+            let mut current = self.value_read.get();
+            let next = format!("{}{}", current, ch);
+            if let Ok(parsed) = next.parse::<usize>() {
+                if parsed <= self.max {
+                    current.push(ch);
+                    self.value_write.set(current);
+                }
+            }
+        }
+    }
+
+    /// Remove last digit.
+    pub fn backspace(&self) {
+        let mut value = self.value_read.get();
+        value.pop();
+        self.value_write.set(value);
+    }
+
+    /// Clear value.
+    pub fn clear(&self) {
+        self.value_write.set(String::new());
+    }
+
+    /// Confirm current value.
+    pub fn confirm(&self) {
+        if let Ok(value) = self.value_read.get().parse::<usize>() {
+            if (1..=self.max).contains(&value) {
+                if let Some(handler) = self
+                    .on_confirm
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .as_ref()
+                {
+                    handler(value);
+                }
+            }
+        }
+        self.hide();
+    }
+
+    /// Get typed value as integer.
+    pub fn get_value(&self) -> Option<usize> {
+        self.value_read
+            .get()
+            .parse::<usize>()
+            .ok()
+            .filter(|v| (*v >= 1) && (*v <= self.max))
+    }
+
+    /// Close dialog and invoke onClose.
+    pub fn close(&self) {
+        if let Some(handler) = self
+            .on_close
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .as_ref()
+        {
+            handler();
+        }
+        self.hide();
+    }
+
+    /// Update dialog props.
+    pub fn set_props(&self, props: GoToDialogProps) {
+        *self.props.lock().unwrap_or_else(|e| e.into_inner()) = GoToDialogProps {
+            max: self.max,
+            ..props
+        };
+    }
+
+    /// Read dialog props.
+    pub fn props(&self) -> GoToDialogProps {
+        self.props.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
+
+    /// Register confirm callback.
+    pub fn set_on_confirm(&self, handler: Option<Arc<dyn Fn(usize) + Send + Sync>>) {
+        *self.on_confirm.lock().unwrap_or_else(|e| e.into_inner()) = handler;
+    }
+
+    /// Register close callback.
+    pub fn set_on_close(&self, handler: Option<Arc<dyn Fn() + Send + Sync>>) {
+        *self.on_close.lock().unwrap_or_else(|e| e.into_inner()) = handler;
+    }
+
+    /// Open signal.
+    pub fn open_signal(&self) -> ReadSignal<bool> {
+        self.open_read.clone()
+    }
+
+    /// Value signal.
+    pub fn value_signal(&self) -> ReadSignal<String> {
+        self.value_read.clone()
+    }
+}
+
+impl Default for GoToDialogState {
+    fn default() -> Self {
+        Self::new(10)
+    }
+}
+
+// =============================================================================
 // Command Palette State
 // =============================================================================
 
 /// State manager for CommandPalette.
 ///
 /// Provides reactive state management for the palette with signals.
+type CommandFilterFn = dyn Fn(&Command, &str) -> i32 + Send + Sync + 'static;
+type CommandSelectHandler = dyn Fn(&Command) + Send + Sync + 'static;
+type CommandCloseHandler = dyn Fn() + Send + Sync + 'static;
+
+/// Optional visual/behavioral props for a command palette instance.
+#[derive(Debug, Clone, Default)]
+pub struct CommandPaletteProps {
+    pub placeholder: Option<String>,
+    pub title: Option<String>,
+    pub max_visible: Option<usize>,
+    pub show_categories: Option<bool>,
+    pub show_shortcuts: Option<bool>,
+    pub width: Option<u16>,
+    pub border_style: Option<String>,
+    pub border_color: Option<String>,
+    pub highlight_color: Option<String>,
+    pub selected_bg: Option<String>,
+    pub no_results_message: Option<String>,
+}
+
+/// Options used to create a JS-compatible command palette state.
+#[derive(Default)]
+pub struct CreateCommandPaletteOptions {
+    /// Initial items.
+    pub items: Vec<Command>,
+    /// Callback when a command is selected.
+    pub on_select: Option<Arc<CommandSelectHandler>>,
+    /// Callback when palette is closed.
+    pub on_close: Option<Arc<CommandCloseHandler>>,
+    /// Optional custom filter function, returns score.
+    pub filter: Option<Arc<CommandFilterFn>>,
+    /// Palette props.
+    pub props: Option<CommandPaletteProps>,
+    /// Focus trap option (kept for compatibility).
+    pub focus_trap: bool,
+    /// Restore focus option (kept for compatibility).
+    pub restore_focus: bool,
+    /// Auto-focus option (kept for compatibility).
+    pub auto_focus: bool,
+    /// Hotkey scope option (kept for compatibility).
+    pub hotkey_scope: Option<String>,
+}
+
+/// Create a command palette state manager (JS-compatible API).
+pub fn create_command_palette(options: CreateCommandPaletteOptions) -> CommandPaletteState {
+    let state = CommandPaletteState::new();
+
+    state.register(options.items);
+    state.set_filter(options.filter);
+    state.set_on_select(options.on_select);
+    state.set_on_close(options.on_close);
+    state.set_props(options.props.unwrap_or_default());
+
+    let focus_enabled = options.focus_trap
+        || options.restore_focus
+        || options.auto_focus
+        || options.hotkey_scope.is_some();
+    if focus_enabled {
+        state.set_zone_id(Some("command_palette_focus_zone".to_string()));
+    }
+
+    state
+}
+
+#[allow(non_snake_case)]
+/// JS compatibility alias.
+pub fn createCommandPalette(options: CreateCommandPaletteOptions) -> CommandPaletteState {
+    create_command_palette(options)
+}
+
 pub struct CommandPaletteState {
     /// Whether palette is open.
     open_read: ReadSignal<bool>,
@@ -843,6 +1358,11 @@ pub struct CommandPaletteState {
     /// All registered commands.
     commands_read: ReadSignal<Vec<Command>>,
     commands_write: WriteSignal<Vec<Command>>,
+    on_select: std::sync::Mutex<Option<Arc<CommandSelectHandler>>>,
+    on_close: std::sync::Mutex<Option<Arc<CommandCloseHandler>>>,
+    filter_fn: std::sync::Mutex<Option<Arc<CommandFilterFn>>>,
+    props: std::sync::Mutex<CommandPaletteProps>,
+    zone_id: std::sync::Mutex<Option<String>>,
 }
 
 impl CommandPaletteState {
@@ -862,6 +1382,11 @@ impl CommandPaletteState {
             selected_write,
             commands_read,
             commands_write,
+            on_select: std::sync::Mutex::new(None),
+            on_close: std::sync::Mutex::new(None),
+            filter_fn: std::sync::Mutex::new(None),
+            props: std::sync::Mutex::new(CommandPaletteProps::default()),
+            zone_id: std::sync::Mutex::new(None),
         }
     }
 
@@ -921,9 +1446,26 @@ impl CommandPaletteState {
         self.set_query(String::new());
     }
 
+    /// Clear query (JS compatibility alias).
+    pub fn clear(&self) {
+        self.clear_query();
+    }
+
+    /// Add text to the query (JS compatibility).
+    pub fn r#type(&self, text: &str) {
+        let mut q = self.query_read.get();
+        q.push_str(text);
+        self.set_query(q);
+    }
+
     /// Get the selected index.
     pub fn selected(&self) -> usize {
         self.selected_read.get()
+    }
+
+    /// JS-compatible alias.
+    pub fn selected_index(&self) -> usize {
+        self.selected()
     }
 
     /// Move selection up.
@@ -934,11 +1476,47 @@ impl CommandPaletteState {
         }
     }
 
+    /// Cycle selection up (JS compatibility behavior).
+    pub fn select_prev_wrap(&self) {
+        let commands = self.filtered();
+        if commands.is_empty() {
+            return;
+        }
+        let current = self.selected_read.get();
+        if current == 0 {
+            self.selected_write.set(commands.len() - 1);
+        } else {
+            self.select_prev();
+        }
+    }
+
     /// Move selection down.
     pub fn select_next(&self, max_items: usize) {
         let current = self.selected_read.get();
         if current + 1 < max_items {
             self.selected_write.set(current + 1);
+        }
+    }
+
+    /// Cycle selection down (JS compatibility behavior).
+    pub fn select_next_wrap(&self) {
+        let commands = self.filtered();
+        if commands.is_empty() {
+            return;
+        }
+        let current = self.selected_read.get();
+        let max = commands.len();
+        if current + 1 < max {
+            self.selected_write.set(current + 1);
+        } else {
+            self.selected_write.set(0);
+        }
+    }
+
+    /// Select by index.
+    pub fn select_index(&self, index: usize) {
+        if index < self.filtered().len() {
+            self.selected_write.set(index);
         }
     }
 
@@ -978,20 +1556,87 @@ impl CommandPaletteState {
         self.commands_write.set(cmds);
     }
 
+    /// Replace command list (JS compatibility method).
+    pub fn set_items(&self, items: Vec<Command>) {
+        self.register(items);
+    }
+
+    /// Set filter function.
+    pub fn set_filter(&self, filter: Option<Arc<CommandFilterFn>>) {
+        *self.filter_fn.lock().unwrap_or_else(|e| e.into_inner()) = filter;
+    }
+
+    /// Set onSelect callback.
+    pub fn set_on_select(&self, handler: Option<Arc<CommandSelectHandler>>) {
+        *self.on_select.lock().unwrap_or_else(|e| e.into_inner()) = handler;
+    }
+
+    /// Set onClose callback.
+    pub fn set_on_close(&self, handler: Option<Arc<CommandCloseHandler>>) {
+        *self.on_close.lock().unwrap_or_else(|e| e.into_inner()) = handler;
+    }
+
+    /// Set extra props.
+    pub fn set_props(&self, props: CommandPaletteProps) {
+        *self.props.lock().unwrap_or_else(|e| e.into_inner()) = props;
+    }
+
+    /// Read current props.
+    pub fn props(&self) -> CommandPaletteProps {
+        self.props.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
+
+    fn current_filter(&self) -> Option<Arc<CommandFilterFn>> {
+        self.filter_fn
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+    }
+
+    fn current_zone_id(&self) -> Option<String> {
+        self.zone_id
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+    }
+
+    fn set_zone_id(&self, zone_id: Option<String>) {
+        *self.zone_id.lock().unwrap_or_else(|e| e.into_inner()) = zone_id;
+    }
+
     /// Get filtered commands based on current query.
     pub fn filtered(&self) -> Vec<Command> {
         let query = self.query_read.get();
         let commands = self.commands_read.get();
+        let filter_fn = self.current_filter();
 
-        let mut results: Vec<Command> = commands
+        if query.is_empty() {
+            return commands.into_iter().filter(|cmd| !cmd.disabled).collect();
+        }
+
+        let mut results: Vec<(i32, Command)> = commands
             .into_iter()
-            .filter(|cmd| !cmd.disabled && cmd.matches(&query))
+            .filter(|cmd| !cmd.disabled)
+            .filter_map(|cmd| {
+                let score = filter_fn
+                    .as_ref()
+                    .map_or(cmd.match_score(&query), |filter| filter(&cmd, &query));
+                if score > 0 {
+                    Some((score, cmd))
+                } else {
+                    None
+                }
+            })
             .collect();
 
         // Sort by match score
-        results.sort_by(|a, b| b.match_score(&query).cmp(&a.match_score(&query)));
+        results.sort_by(|a, b| b.0.cmp(&a.0));
+        results.into_iter().map(|(_, cmd)| cmd).collect()
+    }
 
-        results
+    /// Get filtered commands (JS compatibility alias).
+    pub fn filtered_items(&self) -> Vec<Command> {
+        self.filtered()
     }
 
     /// Get the currently selected command (if any).
@@ -1005,8 +1650,44 @@ impl CommandPaletteState {
     /// Returns the selected command ID if any.
     pub fn execute_selected(&self) -> Option<String> {
         let cmd = self.selected_command();
+        if let Some(command) = &cmd {
+            if let Some(action) = &command.action {
+                action();
+            }
+            if let Some(handler) = self
+                .on_select
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .clone()
+            {
+                handler(command);
+            }
+        }
         self.hide();
         cmd.map(|c| c.id)
+    }
+
+    /// Confirm current selection (JS compatibility).
+    pub fn confirm(&self) -> Option<String> {
+        self.execute_selected()
+    }
+
+    /// Get selected command.
+    pub fn get_selected(&self) -> Option<Command> {
+        self.selected_command()
+    }
+
+    /// Close palette and trigger onClose callback.
+    pub fn close(&self) {
+        if let Some(handler) = self
+            .on_close
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+        {
+            handler();
+        }
+        self.hide();
     }
 
     /// Get the open signal for reactive binding.
@@ -1022,6 +1703,26 @@ impl CommandPaletteState {
     /// Get the selected signal for reactive binding.
     pub fn selected_signal(&self) -> ReadSignal<usize> {
         self.selected_read.clone()
+    }
+
+    /// JS compatibility accessor.
+    pub fn zone_id(&self) -> Option<String> {
+        self.current_zone_id()
+    }
+
+    /// Activate focus zone/hotkeys (no-op compatibility hook).
+    pub fn activate(&self) {}
+
+    /// Deactivate focus zone/hotkeys (no-op compatibility hook).
+    pub fn deactivate(&self) {}
+
+    /// Register a focusable element in this palette (no-op compatibility hook).
+    pub fn register_focusable(
+        &self,
+        _element_id: &str,
+        _on_focus: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    ) -> impl Fn() {
+        || {}
     }
 }
 
@@ -1163,6 +1864,47 @@ mod tests {
 
         state.hide();
         assert!(!state.is_open());
+    }
+
+    #[test]
+    fn test_goto_dialog_state_confirm() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::sync::Arc;
+
+        let state = GoToDialogState::new(100);
+        let called = Arc::new(AtomicUsize::new(0));
+        let called_clone = Arc::clone(&called);
+        state.set_on_confirm(Some(Arc::new(move |value| {
+            assert_eq!(value, 42);
+            called_clone.store(value, Ordering::SeqCst);
+        })));
+
+        state.show();
+        state.type_char('4');
+        state.type_char('2');
+        state.confirm();
+
+        assert_eq!(called.load(Ordering::SeqCst), 42);
+        assert!(!state.is_open());
+        assert_eq!(state.get_value(), Some(42));
+    }
+
+    #[test]
+    fn test_goto_dialog_component_render() {
+        let node = go_to_dialog(GoToDialogProps {
+            value: "3".to_string(),
+            max: 10,
+            title: Some("Go To".to_string()),
+            prompt: Some("Goto:".to_string()),
+            width: Some(24),
+            border_style: Some("round".to_string()),
+            border_color: Some("blue".to_string()),
+        });
+
+        match node {
+            VNode::Box(_) => {}
+            _ => panic!("GoToDialog should render a Box"),
+        }
     }
 
     #[test]

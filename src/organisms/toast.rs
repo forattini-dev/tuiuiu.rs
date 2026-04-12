@@ -4,7 +4,7 @@
 //! Supports multiple variants, positions, and auto-dismiss.
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 
@@ -352,11 +352,7 @@ impl ToastContainer {
         }
 
         // Limit visible toasts
-        let visible: Vec<VNode> = self
-            .toasts
-            .into_iter()
-            .take(self.max_visible)
-            .collect();
+        let visible: Vec<VNode> = self.toasts.into_iter().take(self.max_visible).collect();
 
         // Determine alignment based on position
         let (justify, align) = match self.position {

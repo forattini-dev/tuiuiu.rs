@@ -2,8 +2,10 @@
 //!
 //! A container component with flexbox layout capabilities.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, Color, BorderStyle, Child, children_to_vnodes};
-use crate::core::layout::{FlexDirection, JustifyContent, AlignItems, FlexWrap, Size};
+use crate::core::component::{
+    children_to_vnodes, BorderStyle, BoxNode, BoxStyle, Child, Color, VNode,
+};
+use crate::core::layout::{AlignItems, FlexDirection, FlexWrap, JustifyContent, Size};
 
 /// Box component builder.
 #[derive(Debug, Clone, Default)]
@@ -311,7 +313,10 @@ mod tests {
             .gap(2)
             .border_round();
 
-        assert!(matches!(b.style.flex_direction, Some(FlexDirection::Column)));
+        assert!(matches!(
+            b.style.flex_direction,
+            Some(FlexDirection::Column)
+        ));
         assert_eq!(b.style.padding, Some(1));
         assert_eq!(b.style.gap, Some(2));
         assert!(matches!(b.style.border_style, Some(BorderStyle::Round)));
@@ -321,11 +326,8 @@ mod tests {
     fn test_box_with_children() {
         use crate::primitives::Text;
 
-        let b = BoxComponent::new()
-            .children([
-                Text::new("Hello").build(),
-                Text::new("World").build(),
-            ]);
+        let b =
+            BoxComponent::new().children([Text::new("Hello").build(), Text::new("World").build()]);
 
         assert_eq!(b.children.len(), 2);
     }

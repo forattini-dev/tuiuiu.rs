@@ -7,7 +7,7 @@
 //! - Screen buffer management
 //! - Cursor control
 
-use std::io::{self, Read, Write, Stdout, stdin, stdout};
+use std::io::{self, stdin, stdout, Read, Stdout, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
@@ -524,7 +524,7 @@ fn parse_input<R: Read>(initial: &[u8], reader: &mut R) -> io::Result<Option<Ter
     if first < 32 {
         let key = match first {
             0 => Key::Null,
-            9 => Key::Tab,      // Tab (before Ctrl range to handle specifically)
+            9 => Key::Tab,         // Tab (before Ctrl range to handle specifically)
             10 | 13 => Key::Enter, // Enter/Return
             27 => Key::Escape,
             1..=8 | 11..=12 | 14..=26 => {

@@ -7,55 +7,54 @@
 //! - StatusIndicator, BigText, Digits
 //! - MetricDisplay, Picture, Skeleton
 
-mod button;
-mod text_input;
-mod spinner;
-mod progress;
-mod switch;
 mod badge;
-mod checkbox;
-mod slider;
-mod scrollbar;
-mod timer;
-mod tag;
-mod tooltip;
-mod link;
-mod icon;
-mod status_indicator;
 mod big_text;
+mod button;
+mod checkbox;
 mod digits;
+mod icon;
+mod link;
 mod metric_display;
 mod picture;
+mod progress;
+mod scrollbar;
 mod skeleton;
+mod slider;
+mod spinner;
+mod status_indicator;
+mod switch;
+mod tag;
+mod text_input;
+mod timer;
+mod tooltip;
 
-pub use button::Button;
-pub use text_input::TextInput;
-pub use spinner::Spinner;
-pub use progress::ProgressBar;
-pub use switch::{Switch, SwitchState, SwitchSize};
 pub use badge::{Badge, BadgeVariant};
+pub use big_text::{BigText, BigTextAlign, BigTextFont};
+pub use button::Button;
 pub use checkbox::{Checkbox, CheckboxState, CheckboxValue};
-pub use slider::{Slider, SliderState, SliderMode};
-pub use scrollbar::{Scrollbar, ScrollbarMode};
-pub use timer::{Timer, TimerMode, TimerFormat, TimerState, create_timer_state};
-pub use tag::{Tag, TagVariant, TagSize};
-pub use tooltip::{Tooltip, TooltipPosition};
+pub use digits::{DigitStyle, Digits};
+pub use icon::{icons, Icon, IconSize};
 pub use link::{Link, LinkVariant};
-pub use icon::{Icon, IconSize, icons};
-pub use status_indicator::{StatusIndicator, StatusState, StatusSize};
-pub use big_text::{BigText, BigTextFont, BigTextAlign};
-pub use digits::{Digits, DigitStyle};
 pub use metric_display::{
-    MetricDisplay, MetricState, MetricLayout, MetricSize,
-    ThresholdConfig, ThresholdRange, get_threshold_color, create_metric,
+    create_metric, get_threshold_color, MetricDisplay, MetricLayout, MetricSize, MetricState,
+    ThresholdConfig, ThresholdRange,
 };
 pub use picture::{
-    Picture, PictureProps, PictureFit, PictureAlignX, PictureAlignY,
-    ColoredPicture, Pixel, PixelGrid, ColorPalette,
-    create_pixel_grid, create_pixel_grid_from_colors,
-    AsciiPatterns, create_banner, rainbow_text,
+    create_banner, create_pixel_grid, create_pixel_grid_from_colors, rainbow_text, AsciiPatterns,
+    ColorPalette, ColoredPicture, Picture, PictureAlignX, PictureAlignY, PictureFit, PictureProps,
+    Pixel, PixelGrid,
 };
+pub use progress::ProgressBar;
+pub use scrollbar::{Scrollbar, ScrollbarMode};
 pub use skeleton::{
-    Skeleton, SkeletonText, SkeletonCard,
-    SkeletonChars, SKELETON_ASCII, SKELETON_BLOCKS, SKELETON_DOTS,
+    Skeleton, SkeletonCard, SkeletonChars, SkeletonText, SKELETON_ASCII, SKELETON_BLOCKS,
+    SKELETON_DOTS,
 };
+pub use slider::{Slider, SliderMode, SliderState};
+pub use spinner::Spinner;
+pub use status_indicator::{StatusIndicator, StatusSize, StatusState};
+pub use switch::{Switch, SwitchSize, SwitchState};
+pub use tag::{Tag, TagSize, TagVariant};
+pub use text_input::TextInput;
+pub use timer::{create_timer_state, Timer, TimerFormat, TimerMode, TimerState};
+pub use tooltip::{Tooltip, TooltipPosition};

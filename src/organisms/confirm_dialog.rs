@@ -4,7 +4,7 @@
 //! Built on top of Modal with Yes/No buttons.
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 
@@ -269,7 +269,11 @@ impl ConfirmDialog {
         let (bg, fg, border) = if is_primary {
             (Some(accent), Color::Named(NamedColor::Black), Some(accent))
         } else {
-            (None, Color::Named(NamedColor::White), Some(Color::Named(NamedColor::Gray)))
+            (
+                None,
+                Color::Named(NamedColor::White),
+                Some(Color::Named(NamedColor::Gray)),
+            )
         };
 
         VNode::Box(BoxNode {
@@ -413,9 +417,18 @@ mod tests {
 
     #[test]
     fn test_confirm_variants() {
-        matches!(ConfirmVariant::Default.color(), Color::Named(NamedColor::Blue));
-        matches!(ConfirmVariant::Danger.color(), Color::Named(NamedColor::Red));
-        matches!(ConfirmVariant::Warning.color(), Color::Named(NamedColor::Yellow));
+        matches!(
+            ConfirmVariant::Default.color(),
+            Color::Named(NamedColor::Blue)
+        );
+        matches!(
+            ConfirmVariant::Danger.color(),
+            Color::Named(NamedColor::Red)
+        );
+        matches!(
+            ConfirmVariant::Warning.color(),
+            Color::Named(NamedColor::Yellow)
+        );
     }
 
     #[test]

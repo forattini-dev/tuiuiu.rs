@@ -17,13 +17,13 @@ const HC_FG_MUTED: &str = "#e0e0e0";
 const HC_BORDER: &str = "#ffffff";
 
 // Vivid accent colors (all meet WCAG AAA contrast on black)
-const HC_YELLOW: &str = "#ffff00";      // Pure yellow - highest visibility
-const HC_CYAN: &str = "#00ffff";        // Cyan for info
-const HC_GREEN: &str = "#00ff00";       // Lime for success
-const HC_RED: &str = "#ff0000";         // Pure red for danger
-const HC_ORANGE: &str = "#ff8c00";      // Orange for warnings
-const HC_BLUE: &str = "#00bfff";        // Deep sky blue
-const HC_MAGENTA: &str = "#ff00ff";     // Magenta for highlights
+const HC_YELLOW: &str = "#ffff00"; // Pure yellow - highest visibility
+const HC_CYAN: &str = "#00ffff"; // Cyan for info
+const HC_GREEN: &str = "#00ff00"; // Lime for success
+const HC_RED: &str = "#ff0000"; // Pure red for danger
+const HC_ORANGE: &str = "#ff8c00"; // Orange for warnings
+const HC_BLUE: &str = "#00bfff"; // Deep sky blue
+const HC_MAGENTA: &str = "#ff00ff"; // Magenta for highlights
 
 /// Create the High Contrast theme
 pub fn high_contrast_theme() -> Theme {
@@ -78,9 +78,7 @@ pub fn high_contrast_theme() -> Theme {
                 bg: HC_BG_RAISED,
                 fg: Some(HC_YELLOW),
             },
-            active: ActiveState {
-                bg: HC_BG_SURFACE,
-            },
+            active: ActiveState { bg: HC_BG_SURFACE },
             focus: FocusState {
                 border: HC_YELLOW,
                 ring: FocusRing {

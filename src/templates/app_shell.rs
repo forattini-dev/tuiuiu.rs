@@ -18,9 +18,7 @@
 //! └──────────────────────────────────────────────┘
 //! ```
 
-use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, NamedColor, VNode,
-};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, VNode};
 use crate::core::layout::{FlexDirection, Size};
 
 // =============================================================================
@@ -206,36 +204,32 @@ impl AppShell {
         let content = self.content.clone().unwrap_or(VNode::Empty);
 
         match (&self.sidebar, self.sidebar_position) {
-            (Some(sidebar), SidebarPosition::Left) => {
-                VNode::Box(BoxNode {
-                    id: None,
-                    style: BoxStyle {
-                        flex_direction: Some(FlexDirection::Row),
-                        flex_grow: Some(1.0),
-                        ..Default::default()
-                    },
-                    children: vec![
-                        self.wrap_sidebar(sidebar.clone()),
-                        self.wrap_content(content),
-                    ],
-                    handlers: Default::default(),
-                })
-            }
-            (Some(sidebar), SidebarPosition::Right) => {
-                VNode::Box(BoxNode {
-                    id: None,
-                    style: BoxStyle {
-                        flex_direction: Some(FlexDirection::Row),
-                        flex_grow: Some(1.0),
-                        ..Default::default()
-                    },
-                    children: vec![
-                        self.wrap_content(content),
-                        self.wrap_sidebar(sidebar.clone()),
-                    ],
-                    handlers: Default::default(),
-                })
-            }
+            (Some(sidebar), SidebarPosition::Left) => VNode::Box(BoxNode {
+                id: None,
+                style: BoxStyle {
+                    flex_direction: Some(FlexDirection::Row),
+                    flex_grow: Some(1.0),
+                    ..Default::default()
+                },
+                children: vec![
+                    self.wrap_sidebar(sidebar.clone()),
+                    self.wrap_content(content),
+                ],
+                handlers: Default::default(),
+            }),
+            (Some(sidebar), SidebarPosition::Right) => VNode::Box(BoxNode {
+                id: None,
+                style: BoxStyle {
+                    flex_direction: Some(FlexDirection::Row),
+                    flex_grow: Some(1.0),
+                    ..Default::default()
+                },
+                children: vec![
+                    self.wrap_content(content),
+                    self.wrap_sidebar(sidebar.clone()),
+                ],
+                handlers: Default::default(),
+            }),
             (None, _) => self.wrap_content(content),
         }
     }
@@ -327,9 +321,7 @@ mod tests {
 
     #[test]
     fn test_app_shell_with_header() {
-        let shell = AppShell::new()
-            .header(text("Header"))
-            .build();
+        let shell = AppShell::new().header(text("Header")).build();
 
         if let VNode::Box(node) = shell {
             assert!(!node.children.is_empty());

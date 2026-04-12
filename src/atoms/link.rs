@@ -216,9 +216,7 @@ mod tests {
 
     #[test]
     fn test_link_external() {
-        let link = Link::new("External")
-            .external(true)
-            .build();
+        let link = Link::new("External").external(true).build();
         if let VNode::Text(node) = link {
             assert!(node.content.contains("↗"));
         } else {
@@ -228,9 +226,7 @@ mod tests {
 
     #[test]
     fn test_link_with_icon() {
-        let link = Link::new("Home")
-            .icon("🏠")
-            .build();
+        let link = Link::new("Home").icon("🏠").build();
         if let VNode::Text(node) = link {
             assert!(node.content.starts_with("🏠"));
         } else {
@@ -240,9 +236,7 @@ mod tests {
 
     #[test]
     fn test_link_disabled() {
-        let link = Link::new("Disabled")
-            .disabled(true)
-            .build();
+        let link = Link::new("Disabled").disabled(true).build();
         if let VNode::Text(node) = link {
             assert!(node.style.dim);
             assert!(!node.style.underline);

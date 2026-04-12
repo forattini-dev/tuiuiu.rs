@@ -7,6 +7,11 @@ pub fn measure_text(s: &str) -> usize {
     visible_width(s)
 }
 
+/// Clear any internal text-measurement cache.
+///
+/// The current implementation does not cache measurements, so this is a no-op.
+pub fn clear_text_measure_cache() {}
+
 /// Get the visible width of a string.
 pub fn visible_width(s: &str) -> usize {
     let stripped = strip_ansi(s);

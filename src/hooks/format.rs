@@ -121,10 +121,7 @@ pub fn use_format_percent(n: ReadSignal<f64>) -> Memo<String> {
 /// # Returns
 ///
 /// Memo returning formatted currency like "$1,234.56"
-pub fn use_format_currency(
-    amount: ReadSignal<f64>,
-    symbol: &'static str,
-) -> Memo<String> {
+pub fn use_format_currency(amount: ReadSignal<f64>, symbol: &'static str) -> Memo<String> {
     create_memo(move || format_currency(amount.get(), symbol))
 }
 

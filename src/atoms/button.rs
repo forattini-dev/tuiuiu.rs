@@ -1,6 +1,6 @@
 //! Button Component
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextNode, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, VNode};
 
 /// Button component.
 #[derive(Debug, Clone, Default)]
@@ -37,10 +37,18 @@ impl Button {
         self
     }
 
-    pub fn primary(self) -> Self { self.variant(ButtonVariant::Primary) }
-    pub fn secondary(self) -> Self { self.variant(ButtonVariant::Secondary) }
-    pub fn outline(self) -> Self { self.variant(ButtonVariant::Outline) }
-    pub fn ghost(self) -> Self { self.variant(ButtonVariant::Ghost) }
+    pub fn primary(self) -> Self {
+        self.variant(ButtonVariant::Primary)
+    }
+    pub fn secondary(self) -> Self {
+        self.variant(ButtonVariant::Secondary)
+    }
+    pub fn outline(self) -> Self {
+        self.variant(ButtonVariant::Outline)
+    }
+    pub fn ghost(self) -> Self {
+        self.variant(ButtonVariant::Ghost)
+    }
 
     pub fn build(self) -> VNode {
         let bg = match self.variant {
@@ -67,5 +75,7 @@ impl Button {
 }
 
 impl From<Button> for VNode {
-    fn from(b: Button) -> VNode { b.build() }
+    fn from(b: Button) -> VNode {
+        b.build()
+    }
 }

@@ -15,9 +15,7 @@
 //! └────────────────────────────────────────────────────┘
 //! ```
 
-use crate::core::component::{
-    BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
-};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode};
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent};
 
 // =============================================================================
@@ -436,9 +434,7 @@ mod tests {
 
     #[test]
     fn test_page_with_title() {
-        let page = Page::new()
-            .title("My Page")
-            .build();
+        let page = Page::new().title("My Page").build();
 
         if let VNode::Box(node) = page {
             assert!(!node.children.is_empty());
@@ -464,9 +460,7 @@ mod tests {
 
     #[test]
     fn test_breadcrumb() {
-        let crumb = Breadcrumb::new("Home")
-            .active(true)
-            .icon("🏠");
+        let crumb = Breadcrumb::new("Home").active(true).icon("🏠");
 
         assert_eq!(crumb.label, "Home");
         assert!(crumb.active);

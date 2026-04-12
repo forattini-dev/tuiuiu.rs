@@ -528,9 +528,7 @@ mod tests {
 
     #[test]
     fn test_form_validation_error() {
-        let form = use_form(vec![
-            FormField::new("name").required(),
-        ]);
+        let form = use_form(vec![FormField::new("name").required()]);
 
         // Empty required field
         form.set_text("name", "");

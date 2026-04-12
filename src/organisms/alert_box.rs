@@ -4,7 +4,7 @@
 //! Not a modal - renders inline with content.
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, Size};
 
@@ -231,7 +231,9 @@ impl AlertBox {
 
         // Title row
         if self.show_title {
-            let title_text = self.title.as_ref()
+            let title_text = self
+                .title
+                .as_ref()
                 .map(|t| t.as_str())
                 .unwrap_or_else(|| self.variant.title());
 

@@ -2,7 +2,7 @@
 //!
 //! Text input with suggestions.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 /// Autocomplete suggestion.
 #[derive(Debug, Clone)]
@@ -138,7 +138,8 @@ impl Autocomplete {
         if query.is_empty() {
             self.filtered = (0..self.suggestions.len()).collect();
         } else {
-            self.filtered = self.suggestions
+            self.filtered = self
+                .suggestions
                 .iter()
                 .enumerate()
                 .filter(|(_, s)| s.text.to_lowercase().contains(&query))
@@ -166,14 +167,12 @@ impl Autocomplete {
 
         children.push(VNode::styled_text(
             format!("🔍 {}_", display_value),
-            TextStyle::color(input_color)
+            TextStyle::color(input_color),
         ));
 
         // Suggestions dropdown
         if self.open && !self.filtered.is_empty() {
-            let visible: Vec<_> = self.filtered.iter()
-                .take(self.max_suggestions)
-                .collect();
+            let visible: Vec<_> = self.filtered.iter().take(self.max_suggestions).collect();
 
             for (display_idx, &suggestion_idx) in visible.iter().enumerate() {
                 let suggestion = &self.suggestions[*suggestion_idx];
@@ -212,7 +211,11 @@ impl Autocomplete {
                 let remaining = self.filtered.len() - self.max_suggestions;
                 children.push(VNode::styled_text(
                     format!("  ... and {} more", remaining),
-                    TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Gray)),
+                        dim: true,
+                        ..Default::default()
+                    },
                 ));
             }
         }

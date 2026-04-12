@@ -9,7 +9,7 @@
 //! - Threshold-based color coding
 //! - Horizontal/vertical layouts
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 // =============================================================================
@@ -203,7 +203,11 @@ impl MetricState {
         let prev = self.history[self.history.len() - 2];
         let curr = self.history[self.history.len() - 1];
         if prev == 0.0 {
-            if curr == 0.0 { 0.0 } else { 100.0 }
+            if curr == 0.0 {
+                0.0
+            } else {
+                100.0
+            }
         } else {
             ((curr - prev) / prev.abs()) * 100.0
         }
@@ -211,7 +215,9 @@ impl MetricState {
 
     /// Get color based on thresholds.
     pub fn color(&self) -> Option<Color> {
-        self.thresholds.as_ref().and_then(|t| t.get_color(self.value))
+        self.thresholds
+            .as_ref()
+            .and_then(|t| t.get_color(self.value))
     }
 }
 
@@ -232,7 +238,11 @@ fn build_sparkline(data: &[f64], width: usize) -> String {
 
     let min = data.iter().cloned().fold(f64::INFINITY, f64::min);
     let max = data.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    let range = if (max - min).abs() < f64::EPSILON { 1.0 } else { max - min };
+    let range = if (max - min).abs() < f64::EPSILON {
+        1.0
+    } else {
+        max - min
+    };
 
     let blocks = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
 
@@ -415,28 +425,43 @@ impl MetricDisplay {
     /// Build the VNode.
     pub fn build(self) -> VNode {
         // Resolve values from state or props
-        let label = self.state.as_ref().map(|s| s.label.clone())
+        let label = self
+            .state
+            .as_ref()
+            .map(|s| s.label.clone())
             .or(self.label)
             .unwrap_or_default();
 
-        let value = self.state.as_ref().map(|s| s.value)
+        let value = self
+            .state
+            .as_ref()
+            .map(|s| s.value)
             .or(self.value)
             .unwrap_or(0.0);
 
-        let unit = self.state.as_ref().map(|s| s.unit.clone())
+        let unit = self
+            .state
+            .as_ref()
+            .map(|s| s.unit.clone())
             .or(self.unit)
             .unwrap_or_default();
 
-        let trend = self.state.as_ref().map(|s| s.history.clone())
+        let trend = self
+            .state
+            .as_ref()
+            .map(|s| s.history.clone())
             .or(self.trend);
 
-        let delta = self.delta.or_else(|| self.state.as_ref().map(|s| s.delta()));
+        let delta = self
+            .delta
+            .or_else(|| self.state.as_ref().map(|s| s.delta()));
 
-        let thresholds = self.thresholds.or_else(|| self.state.as_ref().and_then(|s| s.thresholds.clone()));
+        let thresholds = self
+            .thresholds
+            .or_else(|| self.state.as_ref().and_then(|s| s.thresholds.clone()));
 
         // Resolve color
-        let value_color = thresholds.as_ref()
-            .and_then(|t| t.get_color(value));
+        let value_color = thresholds.as_ref().and_then(|t| t.get_color(value));
 
         // Delta color
         let delta_color = delta.map(|d| {
@@ -459,16 +484,20 @@ impl MetricDisplay {
         // Size-based styling
         let (label_style, value_style) = match self.size {
             MetricSize::Compact => (
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() },
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                },
                 TextStyle::default(),
             ),
-            MetricSize::Normal => (
-                TextStyle::default(),
-                TextStyle::default(),
-            ),
+            MetricSize::Normal => (TextStyle::default(), TextStyle::default()),
             MetricSize::Large => (
                 TextStyle::default(),
-                TextStyle { bold: true, ..Default::default() },
+                TextStyle {
+                    bold: true,
+                    ..Default::default()
+                },
             ),
         };
 
@@ -487,9 +516,8 @@ impl MetricDisplay {
                 children.push(VNode::styled_text(label, label_style));
 
                 // Value row
-                let mut value_row: Vec<VNode> = vec![
-                    VNode::styled_text(formatted_value, value_text_style),
-                ];
+                let mut value_row: Vec<VNode> =
+                    vec![VNode::styled_text(formatted_value, value_text_style)];
 
                 if self.show_delta {
                     if let Some(d) = delta {
@@ -497,7 +525,10 @@ impl MetricDisplay {
                             color: delta_color,
                             ..Default::default()
                         };
-                        value_row.push(VNode::styled_text(format!(" {}", format_delta(d)), delta_style));
+                        value_row.push(VNode::styled_text(
+                            format!(" {}", format_delta(d)),
+                            delta_style,
+                        ));
                     }
                 }
 

@@ -1,6 +1,6 @@
 //! Progress Bar Component
 
-use crate::core::component::{VNode, TextNode, TextStyle, Color, NamedColor};
+use crate::core::component::{Color, NamedColor, TextNode, TextStyle, VNode};
 
 /// Progress bar component.
 #[derive(Debug, Clone)]
@@ -27,7 +27,9 @@ impl Default for ProgressBar {
 }
 
 impl ProgressBar {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn value(mut self, value: f32) -> Self {
         self.value = value;
@@ -76,5 +78,7 @@ impl ProgressBar {
 }
 
 impl From<ProgressBar> for VNode {
-    fn from(p: ProgressBar) -> VNode { p.build() }
+    fn from(p: ProgressBar) -> VNode {
+        p.build()
+    }
 }

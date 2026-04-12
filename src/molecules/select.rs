@@ -2,7 +2,7 @@
 //!
 //! Dropdown selection component.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// A single select option.
@@ -137,7 +137,8 @@ impl Select {
     /// Build the VNode.
     pub fn build(self) -> VNode {
         let display_text = if let Some(idx) = self.selected {
-            self.options.get(idx)
+            self.options
+                .get(idx)
                 .map(|o| o.label.clone())
                 .unwrap_or_else(|| self.placeholder.clone())
         } else {
@@ -163,7 +164,10 @@ impl Select {
             Color::Named(NamedColor::Gray)
         };
 
-        children.push(VNode::styled_text(header_text, TextStyle::color(header_color)));
+        children.push(VNode::styled_text(
+            header_text,
+            TextStyle::color(header_color),
+        ));
 
         // Options list (when open)
         if self.open {
@@ -175,9 +179,17 @@ impl Select {
                 let text = format!("{}{}", prefix, opt.label);
 
                 let style = if opt.disabled {
-                    TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Gray)),
+                        dim: true,
+                        ..Default::default()
+                    }
                 } else if is_focused {
-                    TextStyle { color: Some(Color::Named(NamedColor::Cyan)), bold: true, ..Default::default() }
+                    TextStyle {
+                        color: Some(Color::Named(NamedColor::Cyan)),
+                        bold: true,
+                        ..Default::default()
+                    }
                 } else if is_selected {
                     TextStyle::color(Color::Named(NamedColor::Green))
                 } else {
@@ -273,7 +285,9 @@ impl MultiSelect {
 
     /// Build the VNode.
     pub fn build(self) -> VNode {
-        let selected_labels: Vec<_> = self.selected.iter()
+        let selected_labels: Vec<_> = self
+            .selected
+            .iter()
             .filter_map(|&idx| self.options.get(idx).map(|o| o.label.as_str()))
             .collect();
 
@@ -284,14 +298,15 @@ impl MultiSelect {
         };
 
         let header_style = if self.disabled {
-            TextStyle { dim: true, ..Default::default() }
+            TextStyle {
+                dim: true,
+                ..Default::default()
+            }
         } else {
             TextStyle::default()
         };
 
-        let mut children = vec![
-            VNode::styled_text(format!("{} ▼", display), header_style)
-        ];
+        let mut children = vec![VNode::styled_text(format!("{} ▼", display), header_style)];
 
         if self.open && !self.disabled {
             for (idx, opt) in self.options.iter().enumerate() {
@@ -399,7 +414,11 @@ impl RadioGroup {
             let text = format!("{} {}", radio, opt.label);
 
             let style = if opt.disabled {
-                TextStyle { color: Some(Color::Named(NamedColor::Gray)), dim: true, ..Default::default() }
+                TextStyle {
+                    color: Some(Color::Named(NamedColor::Gray)),
+                    dim: true,
+                    ..Default::default()
+                }
             } else if is_selected {
                 TextStyle::color(Color::Named(NamedColor::Cyan))
             } else {

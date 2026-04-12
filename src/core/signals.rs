@@ -12,7 +12,8 @@
 //! let (count, set_count) = create_signal(0);
 //!
 //! // Create a derived computation
-//! let doubled = create_memo(move || count.get() * 2);
+//! let count_for_memo = count.clone();
+//! let doubled = create_memo(move || count_for_memo.get() * 2);
 //!
 //! // Create a side effect
 //! create_effect(move || {
@@ -99,6 +100,9 @@ pub struct ReadSignal<T> {
     inner: Rc<SignalInner<T>>,
 }
 
+/// Compatibility alias for a readable signal handle.
+pub type Signal<T> = ReadSignal<T>;
+
 impl<T: Clone> ReadSignal<T> {
     /// Get the current value, tracking this read as a dependency.
     pub fn get(&self) -> T {
@@ -182,12 +186,8 @@ impl<T: Clone + 'static> WriteSignal<T> {
         let signal_id = self.inner.id;
 
         // Get subscribers from the global registry
-        let subscribers: Vec<Subscriber> = SIGNAL_SUBSCRIBERS.with(|subs| {
-            subs.borrow()
-                .get(&signal_id)
-                .cloned()
-                .unwrap_or_default()
-        });
+        let subscribers: Vec<Subscriber> = SIGNAL_SUBSCRIBERS
+            .with(|subs| subs.borrow().get(&signal_id).cloned().unwrap_or_default());
 
         if is_batching() {
             // Queue effects for later (only effects, memos invalidate immediately)
@@ -358,7 +358,9 @@ pub fn create_effect<F: Fn() + 'static>(callback: F) -> Effect {
 fn run_effect(inner: &Rc<EffectInner>) {
     // Set this effect as the current subscriber
     let prev_subscriber = CURRENT_SUBSCRIBER.with(|current| {
-        current.borrow_mut().replace(Subscriber::Effect(Rc::clone(inner)))
+        current
+            .borrow_mut()
+            .replace(Subscriber::Effect(Rc::clone(inner)))
     });
 
     // Run the callback - signal reads will auto-subscribe
@@ -414,7 +416,9 @@ impl<T: Clone + 'static> Memo<T> {
 
         // Set this memo as the current subscriber
         let prev_subscriber = CURRENT_SUBSCRIBER.with(|current| {
-            current.borrow_mut().replace(Subscriber::Memo(Rc::clone(&self.inner) as Rc<dyn MemoSubscriber>))
+            current.borrow_mut().replace(Subscriber::Memo(
+                Rc::clone(&self.inner) as Rc<dyn MemoSubscriber>
+            ))
         });
 
         // Compute the value - signal reads will auto-subscribe
@@ -511,16 +515,23 @@ fn is_batching() -> bool {
 /// # Example
 ///
 /// ```rust
+/// use std::cell::Cell;
+/// use std::rc::Rc;
 /// use tuiuiu::core::signals::{create_signal, create_effect, batch};
 ///
 /// let (a, set_a) = create_signal(1);
 /// let (b, set_b) = create_signal(2);
 ///
-/// let mut calls = 0;
-/// create_effect(move || {
-///     let _ = a.get() + b.get();
-///     calls += 1; // Would be 3 without batch, but only 2 with batch
-/// });
+/// let calls = Rc::new(Cell::new(0));
+/// {
+///     let calls = Rc::clone(&calls);
+///     let a = a.clone();
+///     let b = b.clone();
+///     create_effect(move || {
+///         let _ = a.get() + b.get();
+///         calls.set(calls.get() + 1);
+///     });
+/// }
 ///
 /// batch(|| {
 ///     set_a.set(10);
@@ -536,7 +547,8 @@ pub fn batch<F: FnOnce() -> R, R>(f: F) -> R {
         BATCHING.with(|b| b.set(false));
 
         // Run all pending effects
-        let effects: Vec<Rc<EffectInner>> = PENDING_EFFECTS.with(|pending| pending.borrow_mut().drain(..).collect());
+        let effects: Vec<Rc<EffectInner>> =
+            PENDING_EFFECTS.with(|pending| pending.borrow_mut().drain(..).collect());
 
         // Deduplicate and run
         let mut seen = HashSet::new();

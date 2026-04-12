@@ -9,7 +9,7 @@
 //! - Legend with intensity levels
 //! - Customizable color schemes
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 // =============================================================================
@@ -237,10 +237,10 @@ impl TimeHeatmap {
             // Default GitHub-like green gradient
             match level {
                 0 => Color::Named(NamedColor::Gray),
-                1 => Color::Rgb(0, 68, 0),      // Dark green
-                2 => Color::Rgb(0, 102, 0),     // Medium-dark green
-                3 => Color::Rgb(0, 153, 0),     // Medium green
-                _ => Color::Rgb(0, 204, 0),     // Bright green
+                1 => Color::Rgb(0, 68, 0),  // Dark green
+                2 => Color::Rgb(0, 102, 0), // Medium-dark green
+                3 => Color::Rgb(0, 153, 0), // Medium green
+                _ => Color::Rgb(0, 204, 0), // Bright green
             }
         }
     }
@@ -333,7 +333,10 @@ impl TimeHeatmap {
 
             // Row label
             if self.show_row_labels {
-                let label = self.data.row_labels.get(row_idx)
+                let label = self
+                    .data
+                    .row_labels
+                    .get(row_idx)
                     .cloned()
                     .unwrap_or_default();
                 let padded = format!("{:>width$} ", label, width = self.label_width);
@@ -447,7 +450,7 @@ pub fn create_weekly_heatmap(weeks: usize) -> HeatmapData {
 
 /// Create a monthly heatmap.
 pub fn create_monthly_heatmap() -> HeatmapData {
-    HeatmapData::new()
-        .row_labels(["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
+    HeatmapData::new().row_labels([
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ])
 }

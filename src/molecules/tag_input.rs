@@ -8,7 +8,9 @@
 //! └─────────────────────────────────────────────────┘
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection, FlexWrap};
 use crate::core::signals::create_signal;
 
@@ -437,7 +439,9 @@ impl From<TagInput> for VNode {
 }
 
 /// Create reactive tag input state.
-pub fn create_tag_input_state(initial_tags: Vec<TagItem>) -> (
+pub fn create_tag_input_state(
+    initial_tags: Vec<TagItem>,
+) -> (
     crate::core::signals::ReadSignal<TagInputState>,
     crate::core::signals::WriteSignal<TagInputState>,
 ) {
@@ -563,10 +567,7 @@ mod tests {
 
     #[test]
     fn test_tag_input_disabled() {
-        let input = TagInput::new()
-            .add_tag("rust")
-            .disabled(true)
-            .build();
+        let input = TagInput::new().add_tag("rust").disabled(true).build();
 
         if let VNode::Box(node) = input {
             // 1 tag only (no input when disabled)

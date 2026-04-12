@@ -1,6 +1,6 @@
 //! Spinner Component
 
-use crate::core::component::{VNode, TextNode};
+use crate::core::component::{TextNode, VNode};
 use crate::core::tick::get_frame;
 
 const SPINNER_FRAMES: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -22,7 +22,9 @@ impl Default for Spinner {
 }
 
 impl Spinner {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn frames(mut self, frames: Vec<char>) -> Self {
         self.frames = frames;
@@ -34,14 +36,20 @@ impl Spinner {
         self
     }
 
-    pub fn dots(self) -> Self { self.frames(vec!['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷']) }
-    pub fn line(self) -> Self { self.frames(vec!['-', '\\', '|', '/']) }
-    pub fn circle(self) -> Self { self.frames(vec!['◐', '◓', '◑', '◒']) }
+    pub fn dots(self) -> Self {
+        self.frames(vec!['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'])
+    }
+    pub fn line(self) -> Self {
+        self.frames(vec!['-', '\\', '|', '/'])
+    }
+    pub fn circle(self) -> Self {
+        self.frames(vec!['◐', '◓', '◑', '◒'])
+    }
 
     pub fn build(self) -> VNode {
         let frame_idx = get_frame(self.frames.len());
         let spinner_char = self.frames[frame_idx];
-        
+
         let content = if let Some(label) = self.label {
             format!("{} {}", spinner_char, label)
         } else {
@@ -56,5 +64,7 @@ impl Spinner {
 }
 
 impl From<Spinner> for VNode {
-    fn from(s: Spinner) -> VNode { s.build() }
+    fn from(s: Spinner) -> VNode {
+        s.build()
+    }
 }

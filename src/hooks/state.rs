@@ -2,7 +2,7 @@
 //!
 //! Local reactive state management.
 
-use crate::core::signals::{create_signal, create_reducer, ReadSignal, WriteSignal};
+use crate::core::signals::{create_reducer, create_signal, ReadSignal, WriteSignal};
 
 /// State handle returned by use_state.
 #[derive(Clone)]

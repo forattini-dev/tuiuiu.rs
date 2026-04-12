@@ -2,7 +2,7 @@
 //!
 //! LCD-style digital number display.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::FlexDirection;
 
 /// Digit display style.
@@ -60,8 +60,7 @@ impl Digits {
 
     /// Create time display (HH:MM:SS).
     pub fn time(hours: u32, minutes: u32, seconds: u32) -> Self {
-        Self::new(format!("{:02}:{:02}:{:02}", hours, minutes, seconds))
-            .colon(true)
+        Self::new(format!("{:02}:{:02}:{:02}", hours, minutes, seconds)).colon(true)
     }
 
     /// Set display style.

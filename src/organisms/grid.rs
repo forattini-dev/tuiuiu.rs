@@ -2,7 +2,7 @@
 //!
 //! CSS Grid-like layout for terminal UIs.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, VNode};
 use crate::core::layout::{FlexDirection, Size};
 
 /// Grid cell content.
@@ -118,7 +118,10 @@ pub struct GridGap {
 impl GridGap {
     /// Create uniform gap.
     pub fn all(gap: u16) -> Self {
-        Self { row: gap, column: gap }
+        Self {
+            row: gap,
+            column: gap,
+        }
     }
 
     /// Create with separate row and column gaps.
@@ -190,10 +193,8 @@ impl Grid {
     where
         I: IntoIterator<Item = VNode>,
     {
-        let row: Vec<Option<GridCell>> = cells
-            .into_iter()
-            .map(|c| Some(GridCell::new(c)))
-            .collect();
+        let row: Vec<Option<GridCell>> =
+            cells.into_iter().map(|c| Some(GridCell::new(c))).collect();
         self.cells.push(row);
         self.rows += 1;
         self
@@ -251,13 +252,17 @@ impl Grid {
         for (i, col) in self.columns.iter().enumerate() {
             match col.width {
                 GridSize::Fixed(w) => {
-                    let w = w.min(col.max_width.unwrap_or(w)).max(col.min_width.unwrap_or(0));
+                    let w = w
+                        .min(col.max_width.unwrap_or(w))
+                        .max(col.min_width.unwrap_or(0));
                     widths[i] = w;
                     remaining = remaining.saturating_sub(w);
                 }
                 GridSize::Auto => {
                     // For now, treat auto as a small fixed size
-                    let w = 10u16.min(col.max_width.unwrap_or(10)).max(col.min_width.unwrap_or(5));
+                    let w = 10u16
+                        .min(col.max_width.unwrap_or(10))
+                        .max(col.min_width.unwrap_or(5));
                     widths[i] = w;
                     remaining = remaining.saturating_sub(w);
                 }
@@ -272,7 +277,9 @@ impl Grid {
             for (i, col) in self.columns.iter().enumerate() {
                 if let GridSize::Flex(f) = col.width {
                     let w = ((remaining as f32 * f) / flex_total) as u16;
-                    let w = w.min(col.max_width.unwrap_or(w)).max(col.min_width.unwrap_or(0));
+                    let w = w
+                        .min(col.max_width.unwrap_or(w))
+                        .max(col.min_width.unwrap_or(0));
                     widths[i] = w;
                 }
             }

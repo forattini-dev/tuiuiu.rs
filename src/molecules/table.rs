@@ -2,7 +2,7 @@
 //!
 //! Data table with headers and rows.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 /// Table column definition.
 #[derive(Debug, Clone)]
@@ -164,18 +164,29 @@ impl Table {
         let mut children = Vec::new();
 
         // Calculate column widths
-        let col_widths: Vec<usize> = self.columns.iter().enumerate().map(|(i, col)| {
-            let header_len = col.header.len();
-            let max_data_len = self.rows.iter()
-                .filter_map(|row| row.get(i))
-                .map(|s| s.len())
-                .max()
-                .unwrap_or(0);
-            col.width.unwrap_or_else(|| header_len.max(max_data_len).max(4))
-        }).collect();
+        let col_widths: Vec<usize> = self
+            .columns
+            .iter()
+            .enumerate()
+            .map(|(i, col)| {
+                let header_len = col.header.len();
+                let max_data_len = self
+                    .rows
+                    .iter()
+                    .filter_map(|row| row.get(i))
+                    .map(|s| s.len())
+                    .max()
+                    .unwrap_or(0);
+                col.width
+                    .unwrap_or_else(|| header_len.max(max_data_len).max(4))
+            })
+            .collect();
 
         // Header row
-        let header_cells: Vec<String> = self.columns.iter().enumerate()
+        let header_cells: Vec<String> = self
+            .columns
+            .iter()
+            .enumerate()
             .map(|(i, col)| {
                 let width = col_widths.get(i).copied().unwrap_or(8);
                 format!("{:<width$}", col.header, width = width)
@@ -185,15 +196,23 @@ impl Table {
         let header_text = header_cells.join(" │ ");
         children.push(VNode::styled_text(
             header_text,
-            TextStyle { color: Some(self.header_color), bold: true, ..Default::default() }
+            TextStyle {
+                color: Some(self.header_color),
+                bold: true,
+                ..Default::default()
+            },
         ));
 
         // Separator
-        let separator: String = col_widths.iter()
+        let separator: String = col_widths
+            .iter()
             .map(|&w| "─".repeat(w))
             .collect::<Vec<_>>()
             .join("─┼─");
-        children.push(VNode::styled_text(separator, TextStyle::color(Color::Named(NamedColor::Gray))));
+        children.push(VNode::styled_text(
+            separator,
+            TextStyle::color(Color::Named(NamedColor::Gray)),
+        ));
 
         // Data rows
         for (row_idx, row) in self.rows.iter().enumerate() {
@@ -223,14 +242,22 @@ impl Table {
 
             children.push(VNode::styled_text(
                 row_text,
-                TextStyle { color: Some(color), inverse: is_selected, ..Default::default() }
+                TextStyle {
+                    color: Some(color),
+                    inverse: is_selected,
+                    ..Default::default()
+                },
             ));
         }
 
         VNode::Box(BoxNode {
             children,
             style: BoxStyle {
-                border_style: if self.border { Some(BorderStyle::Single) } else { None },
+                border_style: if self.border {
+                    Some(BorderStyle::Single)
+                } else {
+                    None
+                },
                 padding_left: Some(1),
                 padding_right: Some(1),
                 ..Default::default()

@@ -2,7 +2,7 @@
 //!
 //! Hierarchical tree view.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor};
+use crate::core::component::{BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 
 /// A tree node.
 #[derive(Debug, Clone)]
@@ -159,7 +159,11 @@ impl Tree {
     }
 
     /// Set folder icons (collapsed, expanded).
-    pub fn folder_icons(mut self, collapsed: impl Into<String>, expanded: impl Into<String>) -> Self {
+    pub fn folder_icons(
+        mut self,
+        collapsed: impl Into<String>,
+        expanded: impl Into<String>,
+    ) -> Self {
         self.folder_icons = (collapsed.into(), expanded.into());
         self
     }
@@ -178,9 +182,17 @@ impl Tree {
         let connector = if depth == 0 {
             ""
         } else if is_last {
-            if self.show_lines { "└─" } else { "  " }
+            if self.show_lines {
+                "└─"
+            } else {
+                "  "
+            }
         } else {
-            if self.show_lines { "├─" } else { "  " }
+            if self.show_lines {
+                "├─"
+            } else {
+                "  "
+            }
         };
 
         // Expand/collapse icon
@@ -199,13 +211,19 @@ impl Tree {
         let label = if icon.is_empty() {
             format!("{}{}{} {}", prefix, connector, expand_icon, node.label)
         } else {
-            format!("{}{}{} {} {}", prefix, connector, expand_icon, icon, node.label)
+            format!(
+                "{}{}{} {} {}",
+                prefix, connector, expand_icon, icon, node.label
+            )
         };
 
         // Check if selected
-        let is_selected = node.id.as_ref()
+        let is_selected = node
+            .id
+            .as_ref()
             .map(|id| self.selected_id.as_ref() == Some(id))
-            .unwrap_or(false) || node.selected;
+            .unwrap_or(false)
+            || node.selected;
 
         let color = if is_selected {
             Color::Named(NamedColor::Cyan)
@@ -217,7 +235,12 @@ impl Tree {
 
         result.push(VNode::styled_text(
             label,
-            TextStyle { color: Some(color), bold: is_selected, inverse: is_selected, ..Default::default() }
+            TextStyle {
+                color: Some(color),
+                bold: is_selected,
+                inverse: is_selected,
+                ..Default::default()
+            },
         ));
 
         // Render children if expanded
@@ -225,7 +248,15 @@ impl Tree {
             let child_prefix = if depth == 0 {
                 String::new()
             } else {
-                let continuation = if is_last { "  " } else { if self.show_lines { "│ " } else { "  " } };
+                let continuation = if is_last {
+                    "  "
+                } else {
+                    if self.show_lines {
+                        "│ "
+                    } else {
+                        "  "
+                    }
+                };
                 format!("{}{}", prefix, continuation)
             };
 

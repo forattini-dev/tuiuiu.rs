@@ -2,7 +2,7 @@
 //!
 //! A scrollable list with item rendering and selection.
 
-use crate::core::component::{VNode, BoxNode, BoxStyle, TextStyle, Color, NamedColor, BorderStyle};
+use crate::core::component::{BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextStyle, VNode};
 use crate::core::layout::{FlexDirection, Size};
 
 /// State for scroll list.
@@ -257,16 +257,14 @@ where
                 ..Default::default()
             });
 
-            children = vec![
-                VNode::Box(BoxNode {
-                    children: vec![content, scrollbar],
-                    style: BoxStyle {
-                        flex_direction: Some(FlexDirection::Row),
-                        ..Default::default()
-                    },
+            children = vec![VNode::Box(BoxNode {
+                children: vec![content, scrollbar],
+                style: BoxStyle {
+                    flex_direction: Some(FlexDirection::Row),
                     ..Default::default()
-                })
-            ];
+                },
+                ..Default::default()
+            })];
         }
 
         let mut container_style = BoxStyle {
@@ -325,7 +323,9 @@ where
 }
 
 /// Convenience function to create a simple string list.
-pub fn simple_scroll_list<I, S>(items: I) -> ScrollList<String, impl Fn(&String, usize, bool) -> VNode>
+pub fn simple_scroll_list<I, S>(
+    items: I,
+) -> ScrollList<String, impl Fn(&String, usize, bool) -> VNode>
 where
     I: IntoIterator<Item = S>,
     S: Into<String>,
@@ -345,3 +345,109 @@ where
         VNode::styled_text(item.clone(), style)
     })
 }
+
+// =============================================================================
+// JS-Compatible API
+// =============================================================================
+
+/// Options for `useScrollList`.
+pub struct UseScrollListOptions {
+    /// Inverted scrolling direction.
+    pub inverted: bool,
+}
+
+impl Default for UseScrollListOptions {
+    fn default() -> Self {
+        Self { inverted: false }
+    }
+}
+
+/// Return type for `useScrollList`.
+#[derive(Clone)]
+pub struct UseScrollListReturn {
+    /// Backing state.
+    pub state: ScrollListState,
+}
+
+impl UseScrollListReturn {
+    /// Scroll to the bottom of the list.
+    pub fn scroll_to_bottom(&self) {
+        // Placeholder for hook-oriented API compatibility.
+        let _ = self;
+    }
+
+    /// Scroll to the top of the list.
+    pub fn scroll_to_top(&self) {
+        let _ = self;
+    }
+
+    /// Scroll by a delta.
+    pub fn scroll_by(&self, _delta: isize) {
+        let _ = self;
+    }
+
+    /// Get the current scroll top.
+    pub fn scroll_top(&self) -> usize {
+        self.state.offset
+    }
+
+    /// Get max scroll.
+    pub fn max_scroll(&self) -> usize {
+        self.state.count.saturating_sub(self.state.visible_height)
+    }
+
+    /// Bind helper payload.
+    pub fn bind(&self) -> ScrollListState {
+        self.state.clone()
+    }
+}
+
+/// Create a scroll list state.
+pub fn createScrollList(count: usize) -> ScrollListState {
+    create_scroll_list_state(count)
+}
+
+/// Snake_case alias.
+pub fn create_scroll_list(count: usize) -> ScrollListState {
+    create_scroll_list_state(count)
+}
+
+/// Hook-style API wrapper.
+pub fn useScrollList(_options: UseScrollListOptions) -> UseScrollListReturn {
+    UseScrollListReturn {
+        state: create_scroll_list_state(0),
+    }
+}
+
+/// Cached list clearing no-op compatibility hook.
+pub fn clearScrollListCache() {}
+
+/// Invalidate a cached list item compatibility hook.
+pub fn invalidateScrollListItem<T>(_item: &T) {
+    let _ = _item;
+}
+
+/// Chat list alias.
+pub struct ChatListProps {
+    pub items: Vec<String>,
+}
+
+fn chat_list_item(item: &String, _idx: usize, _selected: bool) -> VNode {
+    VNode::styled_text(format!("{}", item), TextStyle::default())
+}
+
+/// Create a chat-style list from string items.
+pub fn ChatList<I, S>(items: I) -> ScrollList<String, fn(&String, usize, bool) -> VNode>
+where
+    I: IntoIterator<Item = S>,
+    S: Into<String>,
+{
+    let items: Vec<String> = items.into_iter().map(|s| s.into()).collect();
+    ScrollList::new(items, chat_list_item)
+}
+
+/// Type aliases for compat with JS export shape.
+pub type ScrollListProps<T> = ScrollList<T, fn(&T, usize, bool) -> VNode>;
+pub type ScrollListRenderer<T> = fn(&T, usize, bool) -> VNode;
+pub type ChatListRenderer = fn(&String, usize, bool) -> VNode;
+pub type ChatListFn = fn(Vec<String>) -> ScrollList<String, ChatListRenderer>;

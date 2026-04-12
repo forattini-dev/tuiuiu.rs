@@ -10,7 +10,7 @@
 //! ```
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 
@@ -497,9 +497,7 @@ mod tests {
 
     #[test]
     fn test_status_bar_with_mode() {
-        let bar = StatusBar::new()
-            .mode(StatusMode::normal())
-            .build();
+        let bar = StatusBar::new().mode(StatusMode::normal()).build();
 
         if let VNode::Box(node) = bar {
             assert!(!node.children.is_empty());

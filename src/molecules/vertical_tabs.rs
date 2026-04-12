@@ -11,7 +11,9 @@
 //! └──────────────┴──────────────────────────────┘
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection, Size};
 use crate::core::signals::create_signal;
 
@@ -115,11 +117,7 @@ impl VerticalTabsState {
             .and_then(|k| self.keys.iter().position(|x| x == k))
             .unwrap_or(0);
 
-        let new_idx = if current_idx == 0 {
-            0
-        } else {
-            current_idx - 1
-        };
+        let new_idx = if current_idx == 0 { 0 } else { current_idx - 1 };
 
         self.selected = Some(self.keys[new_idx].clone());
     }
@@ -226,7 +224,11 @@ impl VerticalTabs {
     pub fn tabs(mut self, tabs: Vec<VerticalTab>) -> Self {
         self.tabs = tabs;
         if self.selected.is_none() {
-            self.selected = self.tabs.iter().find(|t| !t.disabled).map(|t| t.key.clone());
+            self.selected = self
+                .tabs
+                .iter()
+                .find(|t| !t.disabled)
+                .map(|t| t.key.clone());
         }
         self
     }
@@ -432,10 +434,7 @@ pub fn create_vertical_tabs_state(
     crate::core::signals::ReadSignal<VerticalTabsState>,
     crate::core::signals::WriteSignal<VerticalTabsState>,
 ) {
-    create_signal(VerticalTabsState {
-        selected,
-        keys,
-    })
+    create_signal(VerticalTabsState { selected, keys })
 }
 
 // =============================================================================

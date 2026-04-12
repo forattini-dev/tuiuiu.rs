@@ -3,8 +3,8 @@
 //! Focus management for components.
 
 use crate::core::focus::{
-    Focusable, focus_element, focus_next, focus_previous, 
-    is_focused, register_focusable, get_active_id,
+    focus_element, focus_next, focus_previous, get_active_id, is_focused, register_focusable,
+    Focusable,
 };
 use crate::core::signals::{create_signal, ReadSignal};
 
@@ -80,7 +80,9 @@ pub fn use_focus(options: FocusOptions) -> FocusResult {
 
     let focus_fn = {
         let id = id;
-        move || { focus_element(id); }
+        move || {
+            focus_element(id);
+        }
     };
 
     let blur_fn = move || {

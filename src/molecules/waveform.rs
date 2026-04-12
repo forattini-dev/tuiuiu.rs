@@ -17,7 +17,9 @@
 //!     .show_peaks(true);
 //! ```
 
-use crate::core::component::{Color, NamedColor, VNode, BoxNode, TextNode, TextStyle, BoxStyle, BorderStyle};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 
 // =============================================================================
 // Types
@@ -205,18 +207,23 @@ impl Waveform {
             return vec![];
         }
 
-        let valid_data: Vec<f64> = self.data.iter().copied().filter(|v| v.is_finite()).collect();
+        let valid_data: Vec<f64> = self
+            .data
+            .iter()
+            .copied()
+            .filter(|v| v.is_finite())
+            .collect();
 
         if valid_data.is_empty() {
             return self.data.iter().map(|_| 0.0).collect();
         }
 
-        let min = self.min.unwrap_or_else(|| {
-            valid_data.iter().copied().fold(f64::INFINITY, f64::min)
-        });
-        let max = self.max.unwrap_or_else(|| {
-            valid_data.iter().copied().fold(f64::NEG_INFINITY, f64::max)
-        });
+        let min = self
+            .min
+            .unwrap_or_else(|| valid_data.iter().copied().fold(f64::INFINITY, f64::min));
+        let max = self
+            .max
+            .unwrap_or_else(|| valid_data.iter().copied().fold(f64::NEG_INFINITY, f64::max));
 
         let range = max - min;
         if range.abs() < f64::EPSILON {
@@ -274,7 +281,10 @@ impl Waveform {
     fn render_bars(&self) -> Vec<String> {
         let normalized = self.normalize_data();
         let resampled = self.resample_data(&normalized);
-        let _color_high = self.color_high.clone().unwrap_or(Color::Named(NamedColor::Yellow));
+        let _color_high = self
+            .color_high
+            .clone()
+            .unwrap_or(Color::Named(NamedColor::Yellow));
 
         let mut rows = Vec::with_capacity(self.height);
 
@@ -554,7 +564,12 @@ impl Default for WaveformBuffer {
 
 /// Generate audio-like data for testing.
 /// Uses a simple deterministic pseudo-random for noise.
-pub fn generate_waveform_data(length: usize, frequency: f64, noise: f64, amplitude: f64) -> Vec<f64> {
+pub fn generate_waveform_data(
+    length: usize,
+    frequency: f64,
+    noise: f64,
+    amplitude: f64,
+) -> Vec<f64> {
     (0..length)
         .map(|i| {
             let sine = (i as f64 * frequency * std::f64::consts::PI * 2.0).sin() * amplitude;
@@ -568,7 +583,12 @@ pub fn generate_waveform_data(length: usize, frequency: f64, noise: f64, amplitu
 
 /// Generate spectrum-like data (higher frequencies = lower amplitude).
 /// Uses a simple deterministic pseudo-random for variation.
-pub fn generate_spectrum_data(bins: usize, peak_bin: usize, spread: f64, variation: f64) -> Vec<f64> {
+pub fn generate_spectrum_data(
+    bins: usize,
+    peak_bin: usize,
+    spread: f64,
+    variation: f64,
+) -> Vec<f64> {
     (0..bins)
         .map(|i| {
             let distance = (i as f64 - peak_bin as f64).abs();

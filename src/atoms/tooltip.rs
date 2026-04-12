@@ -10,7 +10,9 @@
 //!     [Button]
 //! ```
 
-use crate::core::component::{BoxNode, BoxStyle, BorderStyle, Color, NamedColor, TextNode, TextStyle, VNode};
+use crate::core::component::{
+    BorderStyle, BoxNode, BoxStyle, Color, NamedColor, TextNode, TextStyle, VNode,
+};
 use crate::core::layout::{AlignItems, FlexDirection};
 
 // =============================================================================
@@ -318,9 +320,7 @@ mod tests {
 
     #[test]
     fn test_tooltip_hidden() {
-        let tooltip = Tooltip::new("Hidden")
-            .visible(false)
-            .build();
+        let tooltip = Tooltip::new("Hidden").visible(false).build();
         matches!(tooltip, VNode::Empty);
     }
 
@@ -330,9 +330,7 @@ mod tests {
             content: "Button".to_string(),
             style: Default::default(),
         });
-        let tooltip = Tooltip::new("Click me")
-            .child(child)
-            .build();
+        let tooltip = Tooltip::new("Click me").child(child).build();
 
         if let VNode::Box(node) = tooltip {
             assert!(node.children.len() >= 2); // tooltip + child (+ optional arrow)
@@ -343,9 +341,7 @@ mod tests {
 
     #[test]
     fn test_tooltip_no_arrow() {
-        let tooltip = Tooltip::new("No arrow")
-            .arrow(false)
-            .build();
+        let tooltip = Tooltip::new("No arrow").arrow(false).build();
         matches!(tooltip, VNode::Box(_));
     }
 

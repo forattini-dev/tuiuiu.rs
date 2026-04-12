@@ -75,8 +75,8 @@ impl ColorScale {
     /// Get all shades as an array
     pub fn all(&self) -> [&'static str; 11] {
         [
-            self.s50, self.s100, self.s200, self.s300, self.s400, self.s500,
-            self.s600, self.s700, self.s800, self.s900, self.s950,
+            self.s50, self.s100, self.s200, self.s300, self.s400, self.s500, self.s600, self.s700,
+            self.s800, self.s900, self.s950,
         ]
     }
 }
@@ -467,10 +467,8 @@ pub fn parse_color(color_str: &str) -> Option<&'static str> {
 /// List all available color names
 pub fn list_colors() -> &'static [&'static str] {
     &[
-        "slate", "gray", "zinc", "neutral", "stone",
-        "red", "orange", "amber", "yellow", "lime",
-        "green", "emerald", "teal", "cyan", "sky",
-        "blue", "indigo", "violet", "purple", "fuchsia",
+        "slate", "gray", "zinc", "neutral", "stone", "red", "orange", "amber", "yellow", "lime",
+        "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia",
         "pink", "rose",
     ]
 }

@@ -6,24 +6,36 @@
 pub type EasingFunction = fn(f64) -> f64;
 
 /// Linear easing.
-pub fn linear(t: f64) -> f64 { t }
+pub fn linear(t: f64) -> f64 {
+    t
+}
 
 /// Ease in quad.
-pub fn ease_in_quad(t: f64) -> f64 { t * t }
+pub fn ease_in_quad(t: f64) -> f64 {
+    t * t
+}
 
 /// Ease out quad.
-pub fn ease_out_quad(t: f64) -> f64 { t * (2.0 - t) }
+pub fn ease_out_quad(t: f64) -> f64 {
+    t * (2.0 - t)
+}
 
 /// Ease in out quad.
 pub fn ease_in_out_quad(t: f64) -> f64 {
-    if t < 0.5 { 2.0 * t * t } else { -1.0 + (4.0 - 2.0 * t) * t }
+    if t < 0.5 {
+        2.0 * t * t
+    } else {
+        -1.0 + (4.0 - 2.0 * t) * t
+    }
 }
 
 /// Ease in cubic.
-pub fn ease_in_cubic(t: f64) -> f64 { t * t * t }
+pub fn ease_in_cubic(t: f64) -> f64 {
+    t * t * t
+}
 
 /// Ease out cubic.
-pub fn ease_out_cubic(t: f64) -> f64 { 
+pub fn ease_out_cubic(t: f64) -> f64 {
     let t = t - 1.0;
     t * t * t + 1.0
 }

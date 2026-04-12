@@ -133,11 +133,17 @@ impl Skeleton {
             0
         };
 
-        let fill_char = self.chars.animation.get(char_idx).unwrap_or(&self.chars.fill);
+        let fill_char = self
+            .chars
+            .animation
+            .get(char_idx)
+            .unwrap_or(&self.chars.fill);
 
         let mut lines = Vec::new();
         for _ in 0..self.height {
-            let line: String = std::iter::repeat(*fill_char).take(self.width as usize).collect();
+            let line: String = std::iter::repeat(*fill_char)
+                .take(self.width as usize)
+                .collect();
             lines.push(line);
         }
 
@@ -147,9 +153,13 @@ impl Skeleton {
                 let padding = (self.width as usize - label.len() - 2) / 2;
                 let label_line = format!(
                     "{} {} {}",
-                    std::iter::repeat(*fill_char).take(padding).collect::<String>(),
+                    std::iter::repeat(*fill_char)
+                        .take(padding)
+                        .collect::<String>(),
                     label,
-                    std::iter::repeat(*fill_char).take(self.width as usize - padding - label.len() - 2).collect::<String>()
+                    std::iter::repeat(*fill_char)
+                        .take(self.width as usize - padding - label.len() - 2)
+                        .collect::<String>()
                 );
                 if !lines.is_empty() {
                     lines[0] = label_line;
@@ -238,7 +248,11 @@ impl SkeletonText {
             0
         };
 
-        let fill_char = self.chars.animation.get(char_idx).unwrap_or(&self.chars.fill);
+        let fill_char = self
+            .chars
+            .animation
+            .get(char_idx)
+            .unwrap_or(&self.chars.fill);
 
         let mut lines = Vec::new();
         for i in 0..self.lines {
@@ -253,7 +267,9 @@ impl SkeletonText {
                 self.width
             };
 
-            let line: String = std::iter::repeat(*fill_char).take(line_width as usize).collect();
+            let line: String = std::iter::repeat(*fill_char)
+                .take(line_width as usize)
+                .collect();
             lines.push(line);
         }
 
@@ -352,12 +368,18 @@ impl SkeletonCard {
             };
 
             let title = if self.show_title {
-                std::iter::repeat(*fill_char).take(title_width).collect::<String>()
+                std::iter::repeat(*fill_char)
+                    .take(title_width)
+                    .collect::<String>()
             } else {
                 " ".repeat(title_width)
             };
 
-            let gap = if self.show_avatar && self.show_title { " " } else { "" };
+            let gap = if self.show_avatar && self.show_title {
+                " "
+            } else {
+                ""
+            };
             let content = format!("{}{}{}", avatar, gap, title);
             let padding = inner_width.saturating_sub(content.chars().count());
             lines.push(format!("│ {}{} │", content, " ".repeat(padding)));
@@ -430,10 +452,7 @@ mod tests {
 
     #[test]
     fn test_skeleton_text() {
-        let skeleton = SkeletonText::new()
-            .lines(3)
-            .width(20)
-            .animated(false);
+        let skeleton = SkeletonText::new().lines(3).width(20).animated(false);
         let rendered = skeleton.render();
         let lines: Vec<&str> = rendered.lines().collect();
         assert_eq!(lines.len(), 3);

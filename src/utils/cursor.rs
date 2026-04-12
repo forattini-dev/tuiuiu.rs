@@ -1,6 +1,6 @@
 //! Cursor Control Utilities
 
-use std::io::{self, Write, stdout};
+use std::io::{self, stdout, Write};
 
 /// Show the cursor.
 pub fn show_cursor() -> io::Result<()> {

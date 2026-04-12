@@ -84,7 +84,9 @@ impl Canvas {
             if x >= 0 && y >= 0 {
                 self.set(x as u16, y as u16);
             }
-            if x == x1 && y == y1 { break; }
+            if x == x1 && y == y1 {
+                break;
+            }
             let e2 = 2 * err;
             if e2 >= dy {
                 err += dy;
@@ -130,8 +132,14 @@ impl Canvas {
 
                 // Braille dot pattern
                 let dots = [
-                    (0, 0, 0x01), (0, 1, 0x02), (0, 2, 0x04), (0, 3, 0x40),
-                    (1, 0, 0x08), (1, 1, 0x10), (1, 2, 0x20), (1, 3, 0x80),
+                    (0, 0, 0x01),
+                    (0, 1, 0x02),
+                    (0, 2, 0x04),
+                    (0, 3, 0x40),
+                    (1, 0, 0x08),
+                    (1, 1, 0x10),
+                    (1, 2, 0x20),
+                    (1, 3, 0x80),
                 ];
 
                 for (dx, dy, bit) in dots {

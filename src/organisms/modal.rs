@@ -4,7 +4,7 @@
 //! Base component for ConfirmDialog, AlertBox, and other overlays.
 
 use crate::core::component::{
-    BoxNode, BoxStyle, BorderStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
+    BorderStyle, BoxNode, BoxStyle, Color, EventHandlers, NamedColor, TextNode, TextStyle, VNode,
 };
 use crate::core::layout::{AlignItems, FlexDirection, JustifyContent, Size};
 
@@ -481,3 +481,54 @@ mod tests {
         assert!(state.is_open());
     }
 }
+
+// =============================================================================
+// JS-Compatible API
+// =============================================================================
+
+/// Back-compat variant for modal positioning.
+#[derive(Debug, Clone, Copy)]
+pub enum ModalPosition {
+    /// Center of screen.
+    Center,
+    /// Top of screen.
+    Top,
+    /// Bottom of screen.
+    Bottom,
+    /// Fixed coordinates.
+    At(i16, i16),
+}
+
+/// Compatibility props for modal-like constructors.
+#[derive(Debug, Clone)]
+pub struct ModalProps {
+    pub title: Option<String>,
+    pub content: VNode,
+    pub size: Option<ModalSize>,
+    pub position: Option<ModalPosition>,
+}
+
+/// Window aliases for compatibility with the JS export.
+pub type Window = Modal;
+pub type WindowProps = Modal;
+pub type WindowVariant = crate::organisms::confirm_dialog::ConfirmVariant;
+
+/// Compatibility factory.
+pub fn createModal() -> ModalState {
+    ModalState::new()
+}
+
+/// Snake_case alias kept for consistency with Rust naming.
+pub fn create_modal() -> ModalState {
+    ModalState::new()
+}
+
+/// Compatibility factory for confirm dialog state.
+pub fn createConfirmDialog() -> crate::organisms::confirm_dialog::ConfirmDialogState {
+    crate::organisms::confirm_dialog::ConfirmDialogState::new()
+}
+
+/// Toast/alert compatibility exports.
+pub type ToastType = crate::organisms::toast::ToastVariant;
+pub type ToastProps = crate::organisms::toast::Toast;
+pub type AlertBoxProps = crate::organisms::alert_box::AlertBox;

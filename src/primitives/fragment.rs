@@ -2,7 +2,7 @@
 //!
 //! Groups children without a wrapper element.
 
-use crate::core::component::{VNode, Child, children_to_vnodes};
+use crate::core::component::{children_to_vnodes, Child, VNode};
 
 /// Fragment - groups multiple children without a wrapper.
 #[derive(Debug, Clone, Default)]

@@ -14,7 +14,11 @@ pub fn format_number(n: f64) -> String {
         let parts: Vec<&str> = formatted.split('.').collect();
         let int_part = format_integer_str(parts[0]);
         let result = format!("{}.{}", int_part, parts[1]);
-        if is_negative { format!("-{}", result) } else { result }
+        if is_negative {
+            format!("-{}", result)
+        } else {
+            result
+        }
     }
 }
 
@@ -22,7 +26,11 @@ pub fn format_number(n: f64) -> String {
 pub fn format_integer(n: i64, negative: bool) -> String {
     let s = n.abs().to_string();
     let result = format_integer_str(&s);
-    if negative { format!("-{}", result) } else { result }
+    if negative {
+        format!("-{}", result)
+    } else {
+        result
+    }
 }
 
 fn format_integer_str(s: &str) -> String {
@@ -148,7 +156,11 @@ pub fn format_currency(value: f64, symbol: &str) -> String {
     let parts: Vec<&str> = formatted.split('.').collect();
     let int_part = format_integer_str(parts[0]);
     let result = format!("{}{}.{}", symbol, int_part, parts[1]);
-    if is_negative { format!("-{}", result) } else { result }
+    if is_negative {
+        format!("-{}", result)
+    } else {
+        result
+    }
 }
 
 /// Compact number formatting (e.g., 1.2K, 3.4M).
@@ -165,7 +177,11 @@ pub fn format_compact(n: f64) -> String {
     } else if abs_n >= 1_000.0 {
         (abs_n / 1_000.0, "K")
     } else {
-        return if is_negative { format!("-{}", abs_n) } else { abs_n.to_string() };
+        return if is_negative {
+            format!("-{}", abs_n)
+        } else {
+            abs_n.to_string()
+        };
     };
 
     let formatted = if value >= 10.0 || value.fract() < 0.05 {
@@ -174,7 +190,11 @@ pub fn format_compact(n: f64) -> String {
         format!("{:.1}{}", value, suffix)
     };
 
-    if is_negative { format!("-{}", formatted) } else { formatted }
+    if is_negative {
+        format!("-{}", formatted)
+    } else {
+        formatted
+    }
 }
 
 /// Format relative time (e.g., "2 hours ago", "in 3 days").

@@ -188,12 +188,14 @@ impl Scrollbar {
 
         // Get characters based on mode
         let (thumb_char, track_char) = match self.mode {
-            ScrollbarMode::Unicode => {
-                (self.thumb_char.unwrap_or('█'), self.track_char.unwrap_or('│'))
-            }
-            ScrollbarMode::Ascii => {
-                (self.thumb_char.unwrap_or('#'), self.track_char.unwrap_or('|'))
-            }
+            ScrollbarMode::Unicode => (
+                self.thumb_char.unwrap_or('█'),
+                self.track_char.unwrap_or('│'),
+            ),
+            ScrollbarMode::Ascii => (
+                self.thumb_char.unwrap_or('#'),
+                self.track_char.unwrap_or('|'),
+            ),
         };
 
         let geo = self.calculate();
@@ -203,15 +205,9 @@ impl Scrollbar {
             let is_thumb = i >= geo.thumb_pos && i < geo.thumb_pos + geo.thumb_size;
 
             if is_thumb {
-                lines.push(format!(
-                    "\x1b[38;2;{}m{}\x1b[0m",
-                    thumb_rgb, thumb_char
-                ));
+                lines.push(format!("\x1b[38;2;{}m{}\x1b[0m", thumb_rgb, thumb_char));
             } else {
-                lines.push(format!(
-                    "\x1b[2;38;2;{}m{}\x1b[0m",
-                    track_rgb, track_char
-                ));
+                lines.push(format!("\x1b[2;38;2;{}m{}\x1b[0m", track_rgb, track_char));
             }
         }
 
@@ -264,18 +260,14 @@ mod tests {
 
     #[test]
     fn test_scrollbar_not_needed() {
-        let scrollbar = Scrollbar::new()
-            .height(20)
-            .total(10); // Total less than height
+        let scrollbar = Scrollbar::new().height(20).total(10); // Total less than height
 
         assert!(!scrollbar.is_needed());
     }
 
     #[test]
     fn test_scrollbar_needed() {
-        let scrollbar = Scrollbar::new()
-            .height(10)
-            .total(100);
+        let scrollbar = Scrollbar::new().height(10).total(100);
 
         assert!(scrollbar.is_needed());
     }
@@ -283,19 +275,13 @@ mod tests {
     #[test]
     fn test_scrollbar_thumb_position() {
         // At start
-        let start = Scrollbar::new()
-            .height(10)
-            .total(100)
-            .current(0);
+        let start = Scrollbar::new().height(10).total(100).current(0);
         let lines = start.render_lines();
         // First line should contain thumb
         assert!(lines[0].contains('█') || lines[0].contains('#'));
 
         // At end
-        let end = Scrollbar::new()
-            .height(10)
-            .total(100)
-            .current(90);
+        let end = Scrollbar::new().height(10).total(100).current(90);
         let lines = end.render_lines();
         // Last line should contain thumb
         assert!(lines[9].contains('█') || lines[9].contains('#'));
@@ -303,9 +289,7 @@ mod tests {
 
     #[test]
     fn test_scrollbar_ascii_mode() {
-        let scrollbar = Scrollbar::new()
-            .mode(ScrollbarMode::Ascii)
-            .current(0);
+        let scrollbar = Scrollbar::new().mode(ScrollbarMode::Ascii).current(0);
         let lines = scrollbar.render_lines();
 
         // Should use ASCII characters
@@ -315,9 +299,7 @@ mod tests {
 
     #[test]
     fn test_scrollbar_custom_chars() {
-        let scrollbar = Scrollbar::new()
-            .thumb_char('▓')
-            .track_char('░');
+        let scrollbar = Scrollbar::new().thumb_char('▓').track_char('░');
         let lines = scrollbar.render_lines();
         let output = lines.join("");
 

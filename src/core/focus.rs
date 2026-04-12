@@ -237,11 +237,7 @@ impl FocusManager {
     }
 
     fn sorted_focusable_ids(&self) -> Vec<u64> {
-        let mut items: Vec<_> = self
-            .elements
-            .values()
-            .filter(|e| !e.disabled)
-            .collect();
+        let mut items: Vec<_> = self.elements.values().filter(|e| !e.disabled).collect();
 
         items.sort_by_key(|e| (e.tab_index, e.id));
         items.iter().map(|e| e.id).collect()

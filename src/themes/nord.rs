@@ -10,28 +10,28 @@ use super::types::*;
 
 // Nord color palette
 // Polar Night (dark backgrounds)
-const NORD0: &str = "#2e3440";  // Darkest
-const NORD1: &str = "#3b4252";  // Dark
-const NORD2: &str = "#434c5e";  // Medium dark
-const NORD3: &str = "#4c566a";  // Light dark
+const NORD0: &str = "#2e3440"; // Darkest
+const NORD1: &str = "#3b4252"; // Dark
+const NORD2: &str = "#434c5e"; // Medium dark
+const NORD3: &str = "#4c566a"; // Light dark
 
 // Snow Storm (light foregrounds)
-const NORD4: &str = "#d8dee9";  // Dark white
-const NORD5: &str = "#e5e9f0";  // White
-const NORD6: &str = "#eceff4";  // Bright white
+const NORD4: &str = "#d8dee9"; // Dark white
+const NORD5: &str = "#e5e9f0"; // White
+const NORD6: &str = "#eceff4"; // Bright white
 
 // Frost (accent blues)
-const NORD7: &str = "#8fbcbb";   // Teal
-const NORD8: &str = "#88c0d0";   // Cyan
-const NORD9: &str = "#81a1c1";   // Light blue
-const NORD10: &str = "#5e81ac";  // Blue
+const NORD7: &str = "#8fbcbb"; // Teal
+const NORD8: &str = "#88c0d0"; // Cyan
+const NORD9: &str = "#81a1c1"; // Light blue
+const NORD10: &str = "#5e81ac"; // Blue
 
 // Aurora (accents)
-const NORD11: &str = "#bf616a";  // Red
-const NORD12: &str = "#d08770";  // Orange
-const NORD13: &str = "#ebcb8b";  // Yellow
-const NORD14: &str = "#a3be8c";  // Green
-const NORD15: &str = "#b48ead";  // Purple
+const NORD11: &str = "#bf616a"; // Red
+const NORD12: &str = "#d08770"; // Orange
+const NORD13: &str = "#ebcb8b"; // Yellow
+const NORD14: &str = "#a3be8c"; // Green
+const NORD15: &str = "#b48ead"; // Purple
 
 /// Create the Nord theme
 pub fn nord_theme() -> Theme {
