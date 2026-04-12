@@ -24,12 +24,22 @@ Build beautiful, reactive terminal apps with blazing-fast performance.
 
 ---
 
-> **📚 Documentação de Referência**: Esta é a porta para Rust do [tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js). Use a documentação oficial em JavaScript como ponte de implementação:
-> - Docs gerais: [https://github.com/forattini-dev/tuiuiu.js#readme](https://github.com/forattini-dev/tuiuiu.js#readme)
-> - Entrada do pacote: [https://github.com/forattini-dev/tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js)
+> ### 📚 Referência oficial (JS)
+> `tuiuiu.rs` nasce da mesma linguagem conceitual de [tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js).
+> Use estes links da origem como fonte principal da API:
+>
+> - **📘 Docs:** https://github.com/forattini-dev/tuiuiu.js#readme
+> - **📦 Entradas públicas:** https://github.com/forattini-dev/tuiuiu.js/tree/main/dist
+> - **🧩 Exemplos e casos de uso:** https://github.com/forattini-dev/tuiuiu.js/tree/main/examples
+> - **🧪 CLI / scripts:** https://github.com/forattini-dev/tuiuiu.js#cli
+
+## 🔗 Links rápidos da origem
+
+- **Projeto oficial:** https://github.com/forattini-dev/tuiuiu.js
+- **Especificação dos exports:** https://github.com/forattini-dev/tuiuiu.js/tree/main/dist
+- **Histórico de evolução:** https://github.com/forattini-dev/tuiuiu.js/releases
 
 ---
-
 ## Quick Start
 
 ```toml
@@ -309,3 +319,4 @@ MIT © [Tetis](https://tetis.io)
 **tuiuiu.rs** — Rust version (you are here)
 
 </div>
+
