@@ -308,7 +308,7 @@ The [Tuiuiu](https://en.wikipedia.org/wiki/Jabiru) (Jabiru mycteria) is a majest
 
 ## License
 
-MIT © [Tetis](https://tetis.io)
+MIT License
 
 ---
 
