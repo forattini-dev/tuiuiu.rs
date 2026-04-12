@@ -12,11 +12,11 @@ Build beautiful, reactive terminal apps with blazing-fast performance.
 
 [![Crates.io](https://img.shields.io/crates/v/tuiuiu.svg?style=flat-square&color=F5A623)](https://crates.io/crates/tuiuiu)
 [![Downloads](https://img.shields.io/crates/d/tuiuiu.svg?style=flat-square&color=34C759)](https://crates.io/crates/tuiuiu)
-[![Rust](https://img.shields.io/badge/Rust-1.85+-DEA584?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-DEA584?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/crates/l/tuiuiu.svg?style=flat-square&color=007AFF)](LICENSE)
 [![Zero Deps](https://img.shields.io/badge/dependencies-0*-success?style=flat-square)](https://crates.io/crates/tuiuiu)
 
-[📖 Documentation](https://github.com/forattini-dev/tuiuiu.js) · [🚀 Quick Start](#quick-start) · [🦀 Rust API](#rust-api) · [⚡ Performance](#performance)
+[📖 JS Docs](https://github.com/forattini-dev/tuiuiu.js#readme) · [📦 API Spec](https://github.com/forattini-dev/tuiuiu.js/tree/main/dist) · [🚀 Início Rápido](#quick-start) · [🦀 Rust API](#rust-api) · [⚡ Performance](#performance)
 
 <sub>* Only `libc` for raw terminal mode</sub>
 
@@ -24,7 +24,9 @@ Build beautiful, reactive terminal apps with blazing-fast performance.
 
 ---
 
-> **📚 Full Documentation**: This is the Rust port of [tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js). For detailed concepts, architecture, component API, and design philosophy, see the **[JavaScript documentation](https://github.com/forattini-dev/tuiuiu.js#readme)** — the APIs are intentionally similar.
+> **📚 Documentação de Referência**: Esta é a porta para Rust do [tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js). Use a documentação oficial em JavaScript como ponte de implementação:
+> - Docs gerais: [https://github.com/forattini-dev/tuiuiu.js#readme](https://github.com/forattini-dev/tuiuiu.js#readme)
+> - Entrada do pacote: [https://github.com/forattini-dev/tuiuiu.js](https://github.com/forattini-dev/tuiuiu.js)
 
 ---
 
